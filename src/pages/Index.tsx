@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
@@ -11,7 +10,6 @@ import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import { HelpCircle } from 'lucide-react';
 import { Toaster } from 'sonner';
-
 const Index = () => {
   const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
     try {
@@ -20,9 +18,7 @@ const Index = () => {
       return false;
     }
   });
-  
   const [howToUseOpen, setHowToUseOpen] = useState(false);
-  
   const {
     timerState,
     timerDurations,
@@ -30,9 +26,8 @@ const Index = () => {
     startTimer,
     pauseTimer,
     resetTimer,
-    formatTime,
+    formatTime
   } = useTimer(isLongPomodoro);
-  
   const {
     tasks,
     activeTaskId,
@@ -42,14 +37,14 @@ const Index = () => {
     toggleTaskCompletion,
     incrementTaskPomodoros,
     setActiveTask,
-    clearCompletedTasks,
+    clearCompletedTasks
   } = useTasks();
-  
+
   // Save long pomodoro preference
   useEffect(() => {
     localStorage.setItem('isLongPomodoro', isLongPomodoro.toString());
   }, [isLongPomodoro]);
-  
+
   // Update document title with timer
   useEffect(() => {
     let modePrefix = '';
@@ -64,14 +59,12 @@ const Index = () => {
         modePrefix = '🟢 Long Break';
         break;
     }
-    
     document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | ZenFocus`;
-    
     return () => {
       document.title = 'ZenFocus - Pomodoro Timer';
     };
   }, [timerState.timeLeft, timerState.mode, formatTime]);
-  
+
   // Increment completed pomodoros when a pomodoro is completed
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -81,20 +74,19 @@ const Index = () => {
         return e.returnValue;
       }
     };
-    
     window.addEventListener('beforeunload', handleBeforeUnload);
-    
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [timerState.isRunning]);
-  
   const toggleLongPomodoro = () => {
     setIsLongPomodoro(!isLongPomodoro);
   };
-  
   const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: {
+      opacity: 0,
+      y: 20
+    },
     visible: {
       opacity: 1,
       y: 0,
@@ -104,85 +96,52 @@ const Index = () => {
       }
     }
   };
-  
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+    hidden: {
+      opacity: 0,
+      y: 10
+    },
+    visible: {
+      opacity: 1,
+      y: 0
+    }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-mono-100 to-white dark:from-mono-900 dark:to-mono-800 transition-colors">
+  return <div className="min-h-screen bg-gradient-to-b from-mono-100 to-white dark:from-mono-900 dark:to-mono-800 transition-colors">
       <div className="max-w-md mx-auto p-4">
-        <Header 
-          openHowToUse={() => setHowToUseOpen(true)} 
-          toggleLongPomodoro={toggleLongPomodoro}
-          isLongPomodoro={isLongPomodoro}
-        />
+        <Header openHowToUse={() => setHowToUseOpen(true)} toggleLongPomodoro={toggleLongPomodoro} isLongPomodoro={isLongPomodoro} />
         
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="mt-4"
-        >
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mt-4">
           <motion.div variants={itemVariants}>
-            <TimerControls
-              currentMode={timerState.mode}
-              switchMode={switchMode}
-            />
+            <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
           </motion.div>
           
           <motion.div variants={itemVariants}>
-            <Timer
-              timeString={formatTime(timerState.timeLeft)}
-              mode={timerState.mode}
-              isRunning={timerState.isRunning}
-              onStart={startTimer}
-              onPause={pauseTimer}
-              onReset={resetTimer}
-            />
+            <Timer timeString={formatTime(timerState.timeLeft)} mode={timerState.mode} isRunning={timerState.isRunning} onStart={startTimer} onPause={pauseTimer} onReset={resetTimer} />
           </motion.div>
           
           <motion.div variants={itemVariants}>
-            {activeTaskId && (
-              <div className="mt-4 px-4 py-3 bg-mono-100/80 dark:bg-mono-800/80 rounded-lg">
+            {activeTaskId && <div className="mt-4 px-4 py-3 bg-mono-100/80 dark:bg-mono-800/80 rounded-lg">
                 <h3 className="text-sm font-medium text-mono-500 dark:text-mono-400">
                   CURRENT TASK
                 </h3>
                 <p className="font-medium mt-1">
                   {tasks.find(task => task.id === activeTaskId)?.title}
                 </p>
-              </div>
-            )}
+              </div>}
           </motion.div>
           
           <motion.div variants={itemVariants} className="mt-4">
             <h2 className="text-lg font-semibold mb-2">Tasks</h2>
-            <TaskList
-              tasks={tasks}
-              activeTaskId={activeTaskId}
-              onToggleComplete={toggleTaskCompletion}
-              onSetActive={setActiveTask}
-              onDelete={deleteTask}
-              onClearCompleted={clearCompletedTasks}
-            />
+            <TaskList tasks={tasks} activeTaskId={activeTaskId} onToggleComplete={toggleTaskCompletion} onSetActive={setActiveTask} onDelete={deleteTask} onClearCompleted={clearCompletedTasks} />
             <AddTask onAddTask={addTask} />
           </motion.div>
         </motion.div>
         
-        <button
-          onClick={() => setHowToUseOpen(true)}
-          className="fixed left-4 bottom-4 p-2 bg-white dark:bg-mono-800 rounded-full shadow-soft hover:shadow-medium transition-all"
-          aria-label="How to use"
-        >
-          <HelpCircle className="w-5 h-5 text-mono-600 dark:text-mono-300" />
-        </button>
+        
       </div>
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <Toaster position="bottom-center" />
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
