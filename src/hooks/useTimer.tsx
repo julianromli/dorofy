@@ -88,7 +88,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
   // Set up audio for timer completion
   useEffect(() => {
     // Create audio element
-    audioRef.current = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3');
+    audioRef.current = new Audio('/public/alarmbell.wav');
     
     // Fix for iOS and Safari that require user interaction
     document.addEventListener('click', () => {
@@ -127,7 +127,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(title, {
         body: body,
-        icon: '/favicon.ico'
+        icon: '/favicon2.png'
       });
     }
     

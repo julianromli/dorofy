@@ -13,7 +13,7 @@ const Header: React.FC<HeaderProps> = ({ openHowToUse, toggleLongPomodoro, isLon
     <header className="w-full flex justify-between items-center px-4 py-4 animate-fade-in">
       <div className="flex items-center space-x-2">
         <Clock className="w-6 h-6 text-white" />
-        <h1 className="text-xl font-semibold text-white">Dorofy</h1>
+        <h1 className="text-xl font-bold text-white">Dorofy</h1>
       </div>
       
       <div className="flex items-center space-x-4">
