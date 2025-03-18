@@ -1,7 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import { useTheme } from '@/hooks/useTheme';
 
 export type TimerMode = 'pomodoro' | 'shortBreak' | 'longBreak';
 export type TimerDurations = {
@@ -26,12 +25,7 @@ const getTimerDurations = (isLongPomodoro: boolean): TimerDurations => {
   };
 };
 
-// Alarm sound URL
-const ALARM_SOUND_URL = 'https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3';
-
 const useTimer = (isLongPomodoro: boolean = false) => {
-  const { theme } = useTheme();
-  
   // Get appropriate timer durations based on the pomodoro preference
   const [timerDurations, setTimerDurations] = useState<TimerDurations>(getTimerDurations(isLongPomodoro));
   
@@ -93,20 +87,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
 
   // Set up audio for timer completion
   useEffect(() => {
-    // Pre-load the audio
-    if (!audioRef.current) {
-      audioRef.current = new Audio(ALARM_SOUND_URL);
-      
-      // Add event listener for error handling
-      audioRef.current.addEventListener('error', (e) => {
-        console.error('Error loading audio:', e);
-        toast.error('Could not load alarm sound. Please check your internet connection.');
-      });
-      
-      // Try to preload the audio
-      audioRef.current.load();
-    }
-    
+    audioRef.current = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3');
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -117,7 +98,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
 
   // Request notification permission
   useEffect(() => {
-    if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    if ('Notification' in window) {
       Notification.requestPermission();
     }
   }, []);
@@ -125,69 +106,17 @@ const useTimer = (isLongPomodoro: boolean = false) => {
   const showNotification = (title: string, body: string) => {
     // Desktop notification
     if ('Notification' in window && Notification.permission === 'granted') {
-      // Close any existing notifications
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.getNotifications().then(notifications => {
-            notifications.forEach(notification => notification.close());
-          });
-        });
-      }
-      
-      // Create a new notification
       new Notification(title, {
         body: body,
         icon: '/favicon.ico'
       });
     }
     
-    // In-app toast notification (with the correct theme)
+    // In-app toast notification
     toast(title, {
       description: body,
       duration: 5000,
     });
-  };
-
-  const playAlarmSound = () => {
-    if (audioRef.current) {
-      // Reset the audio to the beginning to ensure it plays
-      audioRef.current.currentTime = 0;
-      
-      // Set volume to 80%
-      audioRef.current.volume = 0.8;
-      
-      // Try to play the sound
-      const playPromise = audioRef.current.play();
-      
-      // Handle play promise to avoid uncaught promise errors
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.error('Error playing sound:', e);
-          
-          // Create a user interaction event to play audio later
-          const handleUserInteraction = () => {
-            if (audioRef.current) {
-              audioRef.current.play().catch(err => 
-                console.error('Still cannot play audio after user interaction:', err)
-              );
-            }
-            
-            // Remove the event listeners after trying once
-            document.removeEventListener('click', handleUserInteraction);
-            document.removeEventListener('keydown', handleUserInteraction);
-          };
-          
-          // Add event listeners for user interaction
-          document.addEventListener('click', handleUserInteraction, { once: true });
-          document.addEventListener('keydown', handleUserInteraction, { once: true });
-          
-          // Let the user know they need to interact with the page
-          toast.info('Click anywhere to enable alarm sounds', {
-            duration: 3000,
-          });
-        });
-      }
-    }
   };
 
   // Handle timer countdown
@@ -199,8 +128,24 @@ const useTimer = (isLongPomodoro: boolean = false) => {
           if (prev.timeLeft <= 1) {
             clearInterval(intervalRef.current!);
             
-            // Play alarm sound
-            playAlarmSound();
+            // Play sound
+            if (audioRef.current) {
+              // Reset the audio to the beginning to ensure it plays
+              audioRef.current.currentTime = 0;
+              // Play the sound
+              const playPromise = audioRef.current.play();
+              
+              // Handle play promise to avoid uncaught promise errors
+              if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                  console.error('Error playing sound:', e);
+                  // Try to play again with user interaction
+                  document.addEventListener('click', () => {
+                    audioRef.current?.play();
+                  }, { once: true });
+                });
+              }
+            }
             
             let nextMode: TimerMode = prev.mode;
             let nextTimeLeft = 0;

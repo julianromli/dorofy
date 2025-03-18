@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=degular@400,500,600,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -74,7 +74,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-jakarta;
+    @apply bg-background text-foreground font-degular;
     -webkit-tap-highlight-color: transparent;
   }
   
@@ -190,7 +190,7 @@
 
 /* Music player sidebar */
 .music-sidebar {
-  @apply fixed top-0 left-0 bottom-0 w-80 bg-black/90 z-40 transform transition-transform duration-300 overflow-y-auto;
+  @apply fixed top-0 left-0 bottom-0 w-64 bg-black/90 z-40 transform transition-transform duration-300 overflow-y-auto;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
@@ -216,23 +216,5 @@
 
 /* Large timer in fullscreen mode */
 .fullscreen-timer {
-  @apply text-[14rem] font-bold text-white tracking-tight;
-}
-
-/* Fullscreen inspirational text */
-.inspiration-text {
-  @apply text-4xl md:text-5xl font-semibold text-white/90 mb-8 text-center max-w-3xl;
-}
-
-.personal-greeting {
-  @apply text-2xl md:text-3xl font-medium text-white/80 mb-14 text-center;
-}
-
-/* Draggable playlist items */
-.dragging {
-  @apply opacity-50;
-}
-
-.drag-handle {
-  @apply cursor-grab active:cursor-grabbing;
+  @apply text-[12rem] font-bold text-white tracking-tight;
 }
