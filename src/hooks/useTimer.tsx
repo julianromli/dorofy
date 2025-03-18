@@ -87,26 +87,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
 
   // Set up audio for timer completion
   useEffect(() => {
-    // Create audio element
     audioRef.current = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-bell-notification-933.mp3');
-    
-    // Fix for iOS and Safari that require user interaction
-    document.addEventListener('click', () => {
-      if (audioRef.current) {
-        // Load audio on user interaction
-        audioRef.current.load();
-        // Set volume to 0 and play silently to "prime" the audio system
-        audioRef.current.volume = 0;
-        audioRef.current.play().catch(() => {
-          // Ignore errors here, we're just priming
-        });
-        // Reset volume after priming
-        setTimeout(() => {
-          if (audioRef.current) audioRef.current.volume = 1;
-        }, 100);
-      }
-    }, { once: true });
-    
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -138,40 +119,6 @@ const useTimer = (isLongPomodoro: boolean = false) => {
     });
   };
 
-  const playAlarmSound = () => {
-    if (audioRef.current) {
-      // Reset the audio to the beginning to ensure it plays
-      audioRef.current.currentTime = 0;
-      audioRef.current.volume = 1;
-      
-      // Play the sound
-      const playPromise = audioRef.current.play();
-      
-      // Handle play promise to avoid uncaught promise errors
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.error('Error playing sound:', e);
-          
-          // Try to play again with user interaction
-          const handleUserInteraction = () => {
-            if (audioRef.current) {
-              audioRef.current.play().catch(err => 
-                console.error('Still cannot play audio:', err)
-              );
-            }
-            
-            // Remove the event listeners after trying once
-            document.removeEventListener('click', handleUserInteraction);
-            document.removeEventListener('touchstart', handleUserInteraction);
-          };
-          
-          document.addEventListener('click', handleUserInteraction, { once: true });
-          document.addEventListener('touchstart', handleUserInteraction, { once: true });
-        });
-      }
-    }
-  };
-
   // Handle timer countdown
   useEffect(() => {
     if (timerState.isRunning) {
@@ -181,8 +128,24 @@ const useTimer = (isLongPomodoro: boolean = false) => {
           if (prev.timeLeft <= 1) {
             clearInterval(intervalRef.current!);
             
-            // Play alarm sound
-            playAlarmSound();
+            // Play sound
+            if (audioRef.current) {
+              // Reset the audio to the beginning to ensure it plays
+              audioRef.current.currentTime = 0;
+              // Play the sound
+              const playPromise = audioRef.current.play();
+              
+              // Handle play promise to avoid uncaught promise errors
+              if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                  console.error('Error playing sound:', e);
+                  // Try to play again with user interaction
+                  document.addEventListener('click', () => {
+                    audioRef.current?.play();
+                  }, { once: true });
+                });
+              }
+            }
             
             let nextMode: TimerMode = prev.mode;
             let nextTimeLeft = 0;

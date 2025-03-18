@@ -10,9 +10,8 @@ import HowToUse from '@/components/HowToUse';
 import MusicPlayer from '@/components/MusicPlayer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
-import { useTheme } from '@/hooks/useTheme';
 import { Heart } from 'lucide-react';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
 
 const Index = () => {
   const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
@@ -24,8 +23,6 @@ const Index = () => {
   });
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
-  
-  const { theme, setTheme } = useTheme();
   
   const {
     timerState,
@@ -51,8 +48,8 @@ const Index = () => {
 
   // Set dark mode by default
   useEffect(() => {
-    setTheme('dark');
-  }, [setTheme]);
+    document.documentElement.classList.add('dark');
+  }, []);
 
   // Save long pomodoro preference
   useEffect(() => {
@@ -73,9 +70,9 @@ const Index = () => {
         modePrefix = '🟢 Long Break';
         break;
     }
-    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | PomoBloom`;
+    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | ZenFocus`;
     return () => {
-      document.title = 'PomoBloom - Pomodoro Timer';
+      document.title = 'ZenFocus - Pomodoro Timer';
     };
   }, [timerState.timeLeft, timerState.mode, formatTime]);
 
@@ -190,7 +187,7 @@ const Index = () => {
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
-      <Toaster />
+      <Toaster position="bottom-center" />
     </div>
   );
 };
