@@ -1,4 +1,6 @@
+
 import { useToast } from "@/hooks/use-toast"
+import { useTheme } from "@/hooks/useTheme"
 import {
   Toast,
   ToastClose,
@@ -10,12 +12,13 @@ import {
 
 export function Toaster() {
   const { toasts } = useToast()
+  const { theme } = useTheme()
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} {...props} className={theme === 'dark' ? 'bg-popover text-popover-foreground' : 'bg-white'}>
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (

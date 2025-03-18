@@ -73,11 +73,20 @@ const Timer: React.FC<TimerProps> = ({
       {isFullscreen ? (
         <div className={`fullscreen-mode ${getBgClass()}`}>
           <motion.div 
-            className="flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center p-8 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
+            <motion.h2 
+              className="text-white/80 text-3xl font-medium mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              Let's make today count!
+            </motion.h2>
+            
             <motion.div 
               className="fullscreen-timer mb-10"
               key={timeString}
@@ -123,6 +132,15 @@ const Timer: React.FC<TimerProps> = ({
                 <Minimize className="w-8 h-8" />
               </button>
             </div>
+            
+            <motion.p 
+              className="text-white/60 text-xl mt-12 font-medium"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Faiz Intifada!
+            </motion.p>
           </motion.div>
         </div>
       ) : (
