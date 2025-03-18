@@ -14,7 +14,7 @@ const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }
         <div className="relative">
           <button
             onClick={() => switchMode('pomodoro')}
-            className={`px-6 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
+            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
               currentMode === 'pomodoro' 
                 ? 'text-white font-semibold' 
                 : 'text-white/40 hover:text-white/80'
@@ -45,7 +45,7 @@ const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }
         <div className="relative">
           <button
             onClick={() => switchMode('shortBreak')}
-            className={`px-6 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
+            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
               currentMode === 'shortBreak' 
                 ? 'text-white font-semibold' 
                 : 'text-white/40 hover:text-white/80'
@@ -76,7 +76,7 @@ const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }
         <div className="relative">
           <button
             onClick={() => switchMode('longBreak')}
-            className={`px-6 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
+            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
               currentMode === 'longBreak' 
                 ? 'text-white font-semibold' 
                 : 'text-white/40 hover:text-white/80'
