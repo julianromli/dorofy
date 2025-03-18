@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
@@ -73,9 +72,9 @@ const Index = () => {
         modePrefix = '🟢 Long Break';
         break;
     }
-    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | PomoBloom`;
+    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | Dorofy`;
     return () => {
-      document.title = 'PomoBloom - Pomodoro Timer';
+      document.title = 'Dorofy - Pomodoro Timer';
     };
   }, [timerState.timeLeft, timerState.mode, formatTime]);
 

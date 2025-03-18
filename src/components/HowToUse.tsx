@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,7 +30,7 @@ const HowToUse: React.FC<HowToUseProps> = ({ isOpen, onClose }) => {
             </button>
             
             <div className="p-6">
-              <h2 className="text-xl font-bold mb-4">How to Use ZenFocus</h2>
+              <h2 className="text-xl font-bold mb-4">How to Use Dorofy</h2>
               
               <div className="space-y-6">
                 <section>
@@ -51,7 +50,7 @@ const HowToUse: React.FC<HowToUseProps> = ({ isOpen, onClose }) => {
                 <section>
                   <h3 className="text-lg font-semibold mb-2 text-pomodoro dark:text-pomodoro-light">Using the Timer</h3>
                   <p className="text-mono-700 dark:text-mono-300 mb-3">
-                    ZenFocus offers three timer modes:
+                    Dorofy offers three timer modes:
                   </p>
                   <ul className="list-disc list-inside space-y-2 text-mono-700 dark:text-mono-300">
                     <li><span className="font-medium">Pomodoro</span>: 25 or 50 minutes of focused work</li>
