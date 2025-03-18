@@ -125,7 +125,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flocus-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors">
-      <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col">
+      <div className="max-w-2xl mx-auto px-4 py-6 min-h-screen flex flex-col">
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
           toggleLongPomodoro={toggleLongPomodoro} 
@@ -136,13 +136,13 @@ const Index = () => {
           variants={containerVariants} 
           initial="hidden" 
           animate="visible" 
-          className="mt-6 flex-1 flex flex-col"
+          className="mt-6 flex-1 flex flex-col items-center justify-center"
         >
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} className="w-full">
             <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
           </motion.div>
           
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} className="w-full max-w-lg mx-auto my-8">
             <Timer 
               timeString={formatTime(timerState.timeLeft)} 
               mode={timerState.mode} 
@@ -153,7 +153,7 @@ const Index = () => {
             />
           </motion.div>
           
-          <motion.div variants={itemVariants}>
+          <motion.div variants={itemVariants} className="w-full">
             {activeTaskId && (
               <div className="mt-4 px-4 py-3 bg-white/10 dark:bg-white/5 rounded-lg backdrop-blur-sm">
                 <h3 className="text-sm font-medium text-white/60">
@@ -166,7 +166,7 @@ const Index = () => {
             )}
           </motion.div>
           
-          <motion.div variants={itemVariants} className="mt-6 flex-1">
+          <motion.div variants={itemVariants} className="mt-6 w-full">
             <h2 className="text-lg font-semibold mb-3 text-white">Tasks</h2>
             <TaskList 
               tasks={tasks} 
@@ -180,9 +180,9 @@ const Index = () => {
           </motion.div>
         </motion.div>
         
-        <footer className="footer text-center">
-          <p>
-            2025 &copy; Made with <Heart className="h-3 w-3 inline-block footer-heart" /> by Faiz Intifada
+        <footer className="footer text-center mt-auto pt-4">
+          <p className="text-white/60">
+            2025 &copy; <Heart className="h-3 w-3 inline-block footer-heart" />
           </p>
         </footer>
       </div>
