@@ -1,8 +1,9 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TimerMode } from '@/hooks/useTimer';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, Maximize, Minimize } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TimerProps {
   timeString: string;
@@ -22,9 +23,27 @@ const Timer: React.FC<TimerProps> = ({
   onReset
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { theme } = useTheme();
+  const isMobile = useIsMobile();
 
   const getBgClass = () => {
-    if (isFullscreen) return 'fullscreen-gradient';
+    if (isFullscreen) {
+      if (theme === 'dark') {
+        switch (mode) {
+          case 'pomodoro':
+            return 'pomodoro-gradient';
+          case 'shortBreak':
+            return 'shortbreak-gradient';
+          case 'longBreak':
+            return 'longbreak-gradient';
+          default:
+            return 'pomodoro-gradient';
+        }
+      } else {
+        // For light theme in fullscreen
+        return 'fullscreen-gradient';
+      }
+    }
     
     switch (mode) {
       case 'pomodoro':
@@ -57,7 +76,7 @@ const Timer: React.FC<TimerProps> = ({
   };
 
   // Listen for fullscreen change events (e.g., when user presses Escape)
-  React.useEffect(() => {
+  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -73,13 +92,13 @@ const Timer: React.FC<TimerProps> = ({
       {isFullscreen ? (
         <div className={`fullscreen-mode ${getBgClass()}`}>
           <motion.div 
-            className="flex flex-col items-center justify-center p-8 text-center"
+            className="flex flex-col items-center justify-center p-4 md:p-8 text-center w-full max-w-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
             <motion.h2 
-              className="text-white/80 text-3xl font-medium mb-6"
+              className="text-white/80 text-xl md:text-3xl font-medium mb-4 md:mb-6"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
@@ -88,7 +107,7 @@ const Timer: React.FC<TimerProps> = ({
             </motion.h2>
             
             <motion.div 
-              className="fullscreen-timer"
+              className={`${isMobile ? 'text-[5rem] md:text-[8rem] lg:text-[14rem]' : 'fullscreen-timer'} font-bold text-white tracking-tight`}
               key={timeString}
               initial={{ opacity: 0.8, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -97,44 +116,44 @@ const Timer: React.FC<TimerProps> = ({
               {timeString}
             </motion.div>
             
-            <div className="flex space-x-6">
+            <div className="flex space-x-3 md:space-x-6 mt-6">
               {!isRunning ? (
                 <button
                   onClick={onStart}
-                  className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                  className="p-3 md:p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                   aria-label="Start timer"
                 >
-                  <Play className="w-8 h-8 fill-white" />
+                  <Play className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} fill-white`} />
                 </button>
               ) : (
                 <button
                   onClick={onPause}
-                  className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                  className="p-3 md:p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                   aria-label="Pause timer"
                 >
-                  <Pause className="w-8 h-8 fill-white" />
+                  <Pause className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} fill-white`} />
                 </button>
               )}
               
               <button
                 onClick={onReset}
-                className="p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
+                className="p-3 md:p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
                 aria-label="Reset timer"
               >
-                <RotateCcw className="w-8 h-8" />
+                <RotateCcw className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`} />
               </button>
               
               <button
                 onClick={toggleFullscreen}
-                className="p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
+                className="p-3 md:p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
                 aria-label="Exit fullscreen"
               >
-                <Minimize className="w-8 h-8" />
+                <Minimize className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`} />
               </button>
             </div>
             
             <motion.p 
-              className="text-white/60 text-xl mt-12 font-medium"
+              className="text-white/60 text-base md:text-xl mt-6 md:mt-12 font-medium"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}

@@ -39,6 +39,25 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
   }, [playlists]);
 
   useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement && isOpen) {
+        const sidebar = sidebarRef.current;
+        if (sidebar) {
+          sidebar.style.transform = "translateX(0)";
+          sidebar.style.visibility = "visible";
+          sidebar.style.position = "fixed";
+          sidebar.style.zIndex = "9999";
+        }
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (isOpen || !currentPlaylistId) return;
     
     const sidebar = sidebarRef.current;
