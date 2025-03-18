@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { TimerMode } from '@/hooks/useTimer';
 import { motion } from 'framer-motion';
@@ -41,12 +42,6 @@ const Timer: React.FC<TimerProps> = ({
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
         setIsFullscreen(true);
-        // Force screen wake lock when entering fullscreen
-        try {
-          navigator.wakeLock?.request('screen');
-        } catch (err) {
-          console.error('Wake Lock error:', err);
-        }
       }).catch(err => {
         console.error('Error attempting to enable fullscreen mode:', err);
       });
@@ -76,15 +71,24 @@ const Timer: React.FC<TimerProps> = ({
   return (
     <>
       {isFullscreen ? (
-        <div className={`fixed inset-0 z-50 ${getBgClass()} flex items-center justify-center`}>
+        <div className={`fullscreen-mode ${getBgClass()}`}>
           <motion.div 
-            className="flex flex-col items-center justify-center p-4 sm:p-8 text-center max-w-full"
+            className="flex flex-col items-center justify-center p-8 text-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
+            <motion.h2 
+              className="text-white/80 text-3xl font-medium mb-6"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              Let's make today count!
+            </motion.h2>
+            
             <motion.div 
-              className="text-[12rem] sm:text-[16rem] md:text-[20rem] font-bold text-white tracking-tighter leading-none"
+              className="fullscreen-timer mb-10"
               key={timeString}
               initial={{ opacity: 0.8, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -93,46 +97,55 @@ const Timer: React.FC<TimerProps> = ({
               {timeString}
             </motion.div>
             
-            <div className="flex space-x-6 mt-8">
+            <div className="flex space-x-6">
               {!isRunning ? (
                 <button
                   onClick={onStart}
-                  className="p-6 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                  className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                   aria-label="Start timer"
                 >
-                  <Play className="w-10 h-10 fill-white" />
+                  <Play className="w-8 h-8 fill-white" />
                 </button>
               ) : (
                 <button
                   onClick={onPause}
-                  className="p-6 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                  className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                   aria-label="Pause timer"
                 >
-                  <Pause className="w-10 h-10 fill-white" />
+                  <Pause className="w-8 h-8 fill-white" />
                 </button>
               )}
               
               <button
                 onClick={onReset}
-                className="p-6 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
+                className="p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
                 aria-label="Reset timer"
               >
-                <RotateCcw className="w-10 h-10" />
+                <RotateCcw className="w-8 h-8" />
               </button>
               
               <button
                 onClick={toggleFullscreen}
-                className="p-6 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
+                className="p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
                 aria-label="Exit fullscreen"
               >
-                <Minimize className="w-10 h-10" />
+                <Minimize className="w-8 h-8" />
               </button>
             </div>
+            
+            <motion.p 
+              className="text-white/60 text-xl mt-12 font-medium"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              Faiz Intifada!
+            </motion.p>
           </motion.div>
         </div>
       ) : (
         <div className="w-full rounded-2xl shadow-lg overflow-hidden relative">
-          <div className={`w-full p-8 md:p-12 ${getBgClass()}`}>
+          <div className={`w-full p-6 md:p-8 ${getBgClass()}`}>
             <motion.div 
               className="flex flex-col items-center justify-center"
               initial={{ opacity: 0, y: 10 }}
@@ -140,7 +153,7 @@ const Timer: React.FC<TimerProps> = ({
               transition={{ duration: 0.3 }}
             >
               <motion.div 
-                className="text-8xl md:text-9xl lg:text-[10rem] font-bold text-white my-8 md:my-10 tracking-tighter"
+                className="text-7xl md:text-8xl font-bold text-white my-6 md:my-8 tracking-tight"
                 key={timeString}
                 initial={{ opacity: 0.8, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -149,31 +162,31 @@ const Timer: React.FC<TimerProps> = ({
                 {timeString}
               </motion.div>
               
-              <div className="flex space-x-6">
+              <div className="flex space-x-4">
                 {!isRunning ? (
                   <button
                     onClick={onStart}
-                    className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                    className="p-4 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                     aria-label="Start timer"
                   >
-                    <Play className="w-8 h-8 fill-white" />
+                    <Play className="w-6 h-6 fill-white" />
                   </button>
                 ) : (
                   <button
                     onClick={onPause}
-                    className="p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
+                    className="p-4 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
                     aria-label="Pause timer"
                   >
-                    <Pause className="w-8 h-8 fill-white" />
+                    <Pause className="w-6 h-6 fill-white" />
                   </button>
                 )}
                 
                 <button
                   onClick={onReset}
-                  className="p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
+                  className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
                   aria-label="Reset timer"
                 >
-                  <RotateCcw className="w-8 h-8" />
+                  <RotateCcw className="w-6 h-6" />
                 </button>
               </div>
             </motion.div>
@@ -182,10 +195,10 @@ const Timer: React.FC<TimerProps> = ({
           {/* Fullscreen button */}
           <button
             onClick={toggleFullscreen}
-            className="absolute top-4 right-4 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
+            className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
             aria-label="Enter fullscreen mode"
           >
-            <Maximize className="w-5 h-5" />
+            <Maximize className="w-4 h-4" />
           </button>
         </div>
       )}
