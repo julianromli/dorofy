@@ -84,7 +84,7 @@ const Timer: React.FC<TimerProps> = ({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              Let's make today count!
+              {/* Header Text */}
             </motion.h2>
             
             <motion.div 
@@ -139,7 +139,7 @@ const Timer: React.FC<TimerProps> = ({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
-              Faiz Intifada!
+              {/* Bottom Text */}
             </motion.p>
           </motion.div>
         </div>
