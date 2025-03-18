@@ -57,6 +57,19 @@ const Timer: React.FC<TimerProps> = ({
     }
   };
 
+  const getHeaderText = () => {
+    switch (mode) {
+      case 'pomodoro':
+        return 'Time to focus!';
+      case 'shortBreak':
+        return 'Take a quick break!';
+      case 'longBreak':
+        return 'Time for a long break!';
+      default:
+        return 'Time to focus!';
+    }
+  };
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
@@ -102,8 +115,9 @@ const Timer: React.FC<TimerProps> = ({
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
+              key={`header-${mode}`}
             >
-              {/* Header Text */}
+              {getHeaderText()}
             </motion.h2>
             
             <motion.div 

@@ -182,7 +182,7 @@ const Index = () => {
         
         <footer className="footer text-center">
           <p>
-            2025 &copy; Made with <Heart className="h-3 w-3 inline-block footer-heart" /> by Faiz Intifada
+            2025 &copy; Made with 💖 by Faiz Intifada
           </p>
         </footer>
       </div>
