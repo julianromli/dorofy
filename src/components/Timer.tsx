@@ -88,7 +88,7 @@ const Timer: React.FC<TimerProps> = ({
             </motion.h2>
             
             <motion.div 
-              className="fullscreen-timer mb-10"
+              className="fullscreen-timer"
               key={timeString}
               initial={{ opacity: 0.8, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
