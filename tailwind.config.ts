@@ -67,21 +67,21 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				pomodoro: {
-					DEFAULT: '#E95D6C',
-					dark: '#D23648',
-					light: '#FF7A89',
+					DEFAULT: '#4D39EF',
+					dark: '#3D29DF',
+					light: '#AD5CFF',
 					foreground: '#FFFFFF'
 				},
 				shortbreak: {
-					DEFAULT: '#4DABF7',
-					dark: '#228BE6',
-					light: '#74C0FC',
+					DEFAULT: '#0E78FB',
+					dark: '#0E68FB',
+					light: '#4DA2FF',
 					foreground: '#FFFFFF'
 				},
 				longbreak: {
-					DEFAULT: '#38D9A9',
-					dark: '#12B886',
-					light: '#63E6BE',
+					DEFAULT: '#1CB8A7',
+					dark: '#0CA896',
+					light: '#4DDBC8',
 					foreground: '#FFFFFF'
 				},
 				mono: {

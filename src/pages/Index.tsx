@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
@@ -8,8 +9,9 @@ import AddTask from '@/components/AddTask';
 import HowToUse from '@/components/HowToUse';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
-import { HelpCircle } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Toaster } from 'sonner';
+
 const Index = () => {
   const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
     try {
@@ -19,6 +21,7 @@ const Index = () => {
     }
   });
   const [howToUseOpen, setHowToUseOpen] = useState(false);
+  
   const {
     timerState,
     timerDurations,
@@ -28,6 +31,7 @@ const Index = () => {
     resetTimer,
     formatTime
   } = useTimer(isLongPomodoro);
+  
   const {
     tasks,
     activeTaskId,
@@ -65,7 +69,7 @@ const Index = () => {
     };
   }, [timerState.timeLeft, timerState.mode, formatTime]);
 
-  // Increment completed pomodoros when a pomodoro is completed
+  // Add confirmation when leaving with active timer
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (timerState.isRunning) {
@@ -79,9 +83,11 @@ const Index = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [timerState.isRunning]);
+  
   const toggleLongPomodoro = () => {
     setIsLongPomodoro(!isLongPomodoro);
   };
+  
   const containerVariants = {
     hidden: {
       opacity: 0,
@@ -96,6 +102,7 @@ const Index = () => {
       }
     }
   };
+  
   const itemVariants = {
     hidden: {
       opacity: 0,
@@ -106,42 +113,75 @@ const Index = () => {
       y: 0
     }
   };
-  return <div className="min-h-screen bg-gradient-to-b from-mono-100 to-white dark:from-mono-900 dark:to-mono-800 transition-colors">
-      <div className="max-w-md mx-auto p-4">
-        <Header openHowToUse={() => setHowToUseOpen(true)} toggleLongPomodoro={toggleLongPomodoro} isLongPomodoro={isLongPomodoro} />
+
+  return (
+    <div className="min-h-screen page-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors">
+      <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col">
+        <Header 
+          openHowToUse={() => setHowToUseOpen(true)} 
+          toggleLongPomodoro={toggleLongPomodoro} 
+          isLongPomodoro={isLongPomodoro} 
+        />
         
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="mt-4">
+        <motion.div 
+          variants={containerVariants} 
+          initial="hidden" 
+          animate="visible" 
+          className="mt-6 flex-1 flex flex-col"
+        >
           <motion.div variants={itemVariants}>
             <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
           </motion.div>
           
           <motion.div variants={itemVariants}>
-            <Timer timeString={formatTime(timerState.timeLeft)} mode={timerState.mode} isRunning={timerState.isRunning} onStart={startTimer} onPause={pauseTimer} onReset={resetTimer} />
+            <Timer 
+              timeString={formatTime(timerState.timeLeft)} 
+              mode={timerState.mode} 
+              isRunning={timerState.isRunning} 
+              onStart={startTimer} 
+              onPause={pauseTimer} 
+              onReset={resetTimer} 
+            />
           </motion.div>
           
           <motion.div variants={itemVariants}>
-            {activeTaskId && <div className="mt-4 px-4 py-3 bg-mono-100/80 dark:bg-mono-800/80 rounded-lg">
-                <h3 className="text-sm font-medium text-mono-500 dark:text-mono-400">
+            {activeTaskId && (
+              <div className="mt-4 px-4 py-3 bg-white/10 dark:bg-white/5 rounded-lg backdrop-blur-sm">
+                <h3 className="text-sm font-medium text-white/60">
                   CURRENT TASK
                 </h3>
-                <p className="font-medium mt-1">
+                <p className="font-medium mt-1 text-white">
                   {tasks.find(task => task.id === activeTaskId)?.title}
                 </p>
-              </div>}
+              </div>
+            )}
           </motion.div>
           
-          <motion.div variants={itemVariants} className="mt-4">
-            <h2 className="text-lg font-semibold mb-2">Tasks</h2>
-            <TaskList tasks={tasks} activeTaskId={activeTaskId} onToggleComplete={toggleTaskCompletion} onSetActive={setActiveTask} onDelete={deleteTask} onClearCompleted={clearCompletedTasks} />
+          <motion.div variants={itemVariants} className="mt-6 flex-1">
+            <h2 className="text-lg font-semibold mb-3 text-white">Tasks</h2>
+            <TaskList 
+              tasks={tasks} 
+              activeTaskId={activeTaskId} 
+              onToggleComplete={toggleTaskCompletion} 
+              onSetActive={setActiveTask} 
+              onDelete={deleteTask} 
+              onClearCompleted={clearCompletedTasks} 
+            />
             <AddTask onAddTask={addTask} />
           </motion.div>
         </motion.div>
         
-        
+        <footer className="footer text-center">
+          <p>
+            2025 &copy; Made with <Heart className="h-3 w-3 inline-block footer-heart" /> by Faiz Intifada
+          </p>
+        </footer>
       </div>
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <Toaster position="bottom-center" />
-    </div>;
+    </div>
+  );
 };
+
 export default Index;

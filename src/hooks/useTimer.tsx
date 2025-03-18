@@ -17,28 +17,28 @@ type TimerState = {
   completedPomodoros: number;
 };
 
-const defaultTimerDurations: TimerDurations = {
-  pomodoro: 25 * 60, // 25 minutes
-  shortBreak: 5 * 60, // 5 minutes
-  longBreak: 15 * 60, // 15 minutes
+const getTimerDurations = (isLongPomodoro: boolean): TimerDurations => {
+  return {
+    pomodoro: isLongPomodoro ? 50 * 60 : 25 * 60, // 25 or 50 minutes
+    shortBreak: isLongPomodoro ? 10 * 60 : 5 * 60, // 5 or 10 minutes
+    longBreak: isLongPomodoro ? 25 * 60 : 15 * 60, // 15 or 25 minutes
+  };
 };
 
-const useTimer = (longPomodoro: boolean = false) => {
-  // Adjust durations based on the pomodoro preference
-  const durationMultiplier = longPomodoro ? 2 : 1;
-  
-  const [timerDurations, setTimerDurations] = useState<TimerDurations>({
-    pomodoro: defaultTimerDurations.pomodoro * durationMultiplier,
-    shortBreak: defaultTimerDurations.shortBreak * durationMultiplier,
-    longBreak: defaultTimerDurations.longBreak
-  });
+const useTimer = (isLongPomodoro: boolean = false) => {
+  // Get appropriate timer durations based on the pomodoro preference
+  const [timerDurations, setTimerDurations] = useState<TimerDurations>(getTimerDurations(isLongPomodoro));
   
   // Try to load timer state from localStorage
   const loadTimerState = (): TimerState => {
     try {
       const savedState = localStorage.getItem('timerState');
       if (savedState) {
-        return JSON.parse(savedState);
+        const parsedState = JSON.parse(savedState);
+        return {
+          ...parsedState,
+          timeLeft: timerDurations[parsedState.mode as TimerMode] // Reset timeLeft based on current duration
+        };
       }
     } catch (error) {
       console.error('Error loading timer state:', error);
@@ -56,6 +56,25 @@ const useTimer = (longPomodoro: boolean = false) => {
   const [timerState, setTimerState] = useState<TimerState>(loadTimerState);
   const intervalRef = useRef<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Update timer durations when isLongPomodoro changes
+  useEffect(() => {
+    const newDurations = getTimerDurations(isLongPomodoro);
+    setTimerDurations(newDurations);
+    
+    // Update timeLeft based on current mode
+    setTimerState(prev => ({
+      ...prev,
+      timeLeft: newDurations[prev.mode],
+      isRunning: false // Stop timer when changing duration
+    }));
+    
+    // Clear interval if running
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, [isLongPomodoro]);
 
   // Ensure timer state is saved to localStorage when it changes
   useEffect(() => {
@@ -157,25 +176,10 @@ const useTimer = (longPomodoro: boolean = false) => {
       }
     }
     
-    let timeLeft;
-    switch (mode) {
-      case 'pomodoro':
-        timeLeft = timerDurations.pomodoro;
-        break;
-      case 'shortBreak':
-        timeLeft = timerDurations.shortBreak;
-        break;
-      case 'longBreak':
-        timeLeft = timerDurations.longBreak;
-        break;
-      default:
-        timeLeft = timerDurations.pomodoro;
-    }
-    
     setTimerState({
       ...timerState,
       mode,
-      timeLeft,
+      timeLeft: timerDurations[mode],
       isRunning: false
     });
   };
@@ -198,50 +202,11 @@ const useTimer = (longPomodoro: boolean = false) => {
 
   // Reset the timer
   const resetTimer = () => {
-    let timeLeft;
-    switch (timerState.mode) {
-      case 'pomodoro':
-        timeLeft = timerDurations.pomodoro;
-        break;
-      case 'shortBreak':
-        timeLeft = timerDurations.shortBreak;
-        break;
-      case 'longBreak':
-        timeLeft = timerDurations.longBreak;
-        break;
-      default:
-        timeLeft = timerDurations.pomodoro;
-    }
-    
     setTimerState(prev => ({
       ...prev,
-      timeLeft,
+      timeLeft: timerDurations[prev.mode],
       isRunning: false
     }));
-  };
-
-  // Update timer durations
-  const updateTimerDurations = (durations: Partial<TimerDurations>) => {
-    setTimerDurations(prev => ({ ...prev, ...durations }));
-    
-    // Update current timeLeft if needed
-    setTimerState(prev => {
-      let newTimeLeft = prev.timeLeft;
-      
-      if (prev.mode === 'pomodoro' && durations.pomodoro) {
-        newTimeLeft = durations.pomodoro;
-      } else if (prev.mode === 'shortBreak' && durations.shortBreak) {
-        newTimeLeft = durations.shortBreak;
-      } else if (prev.mode === 'longBreak' && durations.longBreak) {
-        newTimeLeft = durations.longBreak;
-      }
-      
-      return {
-        ...prev,
-        timeLeft: newTimeLeft,
-        isRunning: false
-      };
-    });
   };
 
   // Format time as MM:SS
@@ -258,7 +223,6 @@ const useTimer = (longPomodoro: boolean = false) => {
     startTimer,
     pauseTimer,
     resetTimer,
-    updateTimerDurations,
     formatTime,
   };
 };

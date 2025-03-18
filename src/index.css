@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    --primary: 350 80% 50%;
+    --primary: 265 80% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 80% 50%;
@@ -39,22 +39,22 @@
   }
 
   .dark {
-    --background: 0 0% 10%;
+    --background: 267 100% 5%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 15%;
+    --card: 267 100% 10%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 15%;
+    --popover: 267 100% 7%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 350 80% 50%;
+    --primary: 265 80% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 80% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 20%;
+    --muted: 267 100% 15%;
     --muted-foreground: 0 0% 70%;
 
     --accent: 160 80% 50%;
@@ -63,9 +63,9 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 40%;
+    --border: 267 100% 25%;
+    --input: 267 100% 20%;
+    --ring: 267 100% 40%;
   }
 }
 
@@ -79,28 +79,27 @@
   }
   
   .glass-card {
-    @apply backdrop-blur-md bg-white/80 dark:bg-mono-800/80 border border-white/20 dark:border-mono-700/30;
+    @apply backdrop-blur-md bg-white/80 dark:bg-card/30 border border-white/20 dark:border-white/5;
   }
   
-  .timer-container {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    @apply backdrop-blur-md border border-white/20 dark:border-mono-700/30 rounded-2xl;
+  .spotify-gradient {
+    background: linear-gradient(135deg, #5D52D1 0%, #4D39EF 100%);
   }
   
   .pomodoro-gradient {
-    background: linear-gradient(135deg, #FF6B6B 0%, #FF8787 100%);
+    background: linear-gradient(135deg, #4D39EF 0%, #AD5CFF 100%);
   }
   
   .shortbreak-gradient {
-    background: linear-gradient(135deg, #4DABF7 0%, #74C0FC 100%);
+    background: linear-gradient(135deg, #0E78FB 0%, #4DA2FF 100%);
   }
   
   .longbreak-gradient {
-    background: linear-gradient(135deg, #38D9A9 0%, #63E6BE 100%);
+    background: linear-gradient(135deg, #1CB8A7 0%, #4DDBC8 100%);
   }
   
-  .mono-gradient {
-    background: linear-gradient(135deg, #444 0%, #222 100%);
+  .spotify-gradient-bg {
+    background: linear-gradient(135deg, #5603AD 0%, #2D0A6E 100%);
   }
 }
 
@@ -160,4 +159,18 @@
     opacity: 0;
     transform: translateX(100%) rotate(30deg);
   }
+}
+
+/* Page background gradient */
+.page-gradient {
+  background: linear-gradient(135deg, #5603AD 0%, #4D39EF 100%);
+}
+
+/* Footer styling */
+.footer {
+  @apply text-xs text-white/60 mt-8 pt-4 border-t border-white/10;
+}
+
+.footer-heart {
+  @apply text-red-500 animate-pulse;
 }
