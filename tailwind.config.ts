@@ -102,8 +102,8 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			fontFamily: {
-				sans: ['Degular', 'sans-serif'],
-				degular: ['Degular', 'sans-serif'],
+				sans: ['Plus Jakarta Sans', 'sans-serif'],
+				jakarta: ['Plus Jakarta Sans', 'sans-serif'],
 			},
 			keyframes: {
 				'accordion-down': {
