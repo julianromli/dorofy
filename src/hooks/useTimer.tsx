@@ -96,6 +96,29 @@ const useTimer = (isLongPomodoro: boolean = false) => {
     };
   }, []);
 
+  // Request notification permission
+  useEffect(() => {
+    if ('Notification' in window) {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const showNotification = (title: string, body: string) => {
+    // Desktop notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body: body,
+        icon: '/favicon.ico'
+      });
+    }
+    
+    // In-app toast notification
+    toast(title, {
+      description: body,
+      duration: 5000,
+    });
+  };
+
   // Handle timer countdown
   useEffect(() => {
     if (timerState.isRunning) {
@@ -107,7 +130,21 @@ const useTimer = (isLongPomodoro: boolean = false) => {
             
             // Play sound
             if (audioRef.current) {
-              audioRef.current.play().catch(e => console.error('Error playing sound:', e));
+              // Reset the audio to the beginning to ensure it plays
+              audioRef.current.currentTime = 0;
+              // Play the sound
+              const playPromise = audioRef.current.play();
+              
+              // Handle play promise to avoid uncaught promise errors
+              if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                  console.error('Error playing sound:', e);
+                  // Try to play again with user interaction
+                  document.addEventListener('click', () => {
+                    audioRef.current?.play();
+                  }, { once: true });
+                });
+              }
             }
             
             let nextMode: TimerMode = prev.mode;
@@ -122,11 +159,17 @@ const useTimer = (isLongPomodoro: boolean = false) => {
               if (completedPomos % 4 === 0) {
                 nextMode = 'longBreak';
                 nextTimeLeft = timerDurations.longBreak;
-                toast.success('Great job! Time for a long break.');
+                showNotification(
+                  'Great job! Time for a long break.',
+                  `You've completed ${completedPomos} pomodoros. Take a well-deserved ${Math.floor(timerDurations.longBreak / 60)} minute break.`
+                );
               } else {
                 nextMode = 'shortBreak';
                 nextTimeLeft = timerDurations.shortBreak;
-                toast.success('Pomodoro completed! Take a short break.');
+                showNotification(
+                  'Pomodoro completed!',
+                  `Take a ${Math.floor(timerDurations.shortBreak / 60)} minute break before your next focus session.`
+                );
               }
             } else {
               // After a break, go back to pomodoro
@@ -134,9 +177,15 @@ const useTimer = (isLongPomodoro: boolean = false) => {
               nextTimeLeft = timerDurations.pomodoro;
               
               if (prev.mode === 'shortBreak') {
-                toast.info('Break finished. Ready for your next focus session?');
+                showNotification(
+                  'Break finished',
+                  'Ready for your next focus session?'
+                );
               } else {
-                toast.info('Long break finished. Ready to get back to work?');
+                showNotification(
+                  'Long break finished',
+                  'Ready to get back to work?'
+                );
               }
             }
             

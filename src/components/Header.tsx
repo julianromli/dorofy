@@ -2,7 +2,6 @@
 import React from 'react';
 import { Clock, HelpCircle } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { Switch } from "@/components/ui/switch";
 
 interface HeaderProps {
   openHowToUse: () => void;
@@ -19,17 +18,13 @@ const Header: React.FC<HeaderProps> = ({ openHowToUse, toggleLongPomodoro, isLon
       </div>
       
       <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-white/80">
-            {isLongPomodoro ? '50 min' : '25 min'}
-          </span>
-          <Switch
-            checked={isLongPomodoro}
-            onCheckedChange={toggleLongPomodoro}
-            className="data-[state=checked]:bg-white/30 data-[state=unchecked]:bg-white/20"
-            aria-label={isLongPomodoro ? "Switch to 25-minute pomodoro" : "Switch to 50-minute pomodoro"}
-          />
-        </div>
+        <button
+          onClick={toggleLongPomodoro}
+          className="px-3 py-1.5 text-sm rounded-full bg-white/10 hover:bg-white/20 text-white/90 transition-colors"
+          aria-label={isLongPomodoro ? "Switch to 25-minute pomodoro" : "Switch to 50-minute pomodoro"}
+        >
+          {isLongPomodoro ? '50 min' : '25 min'}
+        </button>
         
         <ThemeToggle />
         

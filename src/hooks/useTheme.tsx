@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 type Theme = 'dark' | 'light';
 
 export const useTheme = () => {
-  // Initialize theme from localStorage or system preference
+  // Initialize theme from localStorage or default to dark
   const [theme, setTheme] = useState<Theme>(() => {
     // Try to get the theme from localStorage
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -12,8 +12,8 @@ export const useTheme = () => {
       return savedTheme;
     }
     
-    // If no saved theme, use system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    // Default to dark mode
+    return 'dark';
   });
 
   // Update localStorage and apply theme changes

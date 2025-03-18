@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=degular@400,500,600,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -74,7 +74,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-jakarta;
+    @apply bg-background text-foreground font-degular;
     -webkit-tap-highlight-color: transparent;
   }
   
@@ -100,6 +100,14 @@
   
   .spotify-gradient-bg {
     background: linear-gradient(135deg, #5603AD 0%, #2D0A6E 100%);
+  }
+
+  .flocus-gradient {
+    background: linear-gradient(135deg, #4723C8 0%, #BF16A2 35%, #FF0078 65%, #FF5B66 100%);
+  }
+
+  .fullscreen-gradient {
+    background: linear-gradient(135deg, #3a2d9a 0%, #ca217a 35%, #e21476 65%, #ee5f75 100%);
   }
 }
 
@@ -173,4 +181,40 @@
 
 .footer-heart {
   @apply text-red-500 animate-pulse;
+}
+
+/* Full screen styling */
+.fullscreen-mode {
+  @apply fixed inset-0 z-50 flex flex-col items-center justify-center;
+}
+
+/* Music player sidebar */
+.music-sidebar {
+  @apply fixed top-0 left-0 bottom-0 w-64 bg-black/90 z-40 transform transition-transform duration-300 overflow-y-auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.music-sidebar-open {
+  @apply translate-x-0;
+}
+
+.music-sidebar-closed {
+  @apply -translate-x-full;
+}
+
+.playlist-card {
+  @apply bg-black/50 rounded-md overflow-hidden mb-3 border border-white/10;
+}
+
+.playlist-controls {
+  @apply flex items-center justify-between p-2 bg-black/60;
+}
+
+.player-button {
+  @apply p-2 text-white/70 hover:text-white/100 transition-colors;
+}
+
+/* Large timer in fullscreen mode */
+.fullscreen-timer {
+  @apply text-[12rem] font-bold text-white tracking-tight;
 }

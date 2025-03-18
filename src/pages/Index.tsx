@@ -7,6 +7,7 @@ import TimerControls from '@/components/TimerControls';
 import TaskList from '@/components/TaskList';
 import AddTask from '@/components/AddTask';
 import HowToUse from '@/components/HowToUse';
+import MusicPlayer from '@/components/MusicPlayer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import { Heart } from 'lucide-react';
@@ -21,6 +22,7 @@ const Index = () => {
     }
   });
   const [howToUseOpen, setHowToUseOpen] = useState(false);
+  const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   
   const {
     timerState,
@@ -43,6 +45,11 @@ const Index = () => {
     setActiveTask,
     clearCompletedTasks
   } = useTasks();
+
+  // Set dark mode by default
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
 
   // Save long pomodoro preference
   useEffect(() => {
@@ -115,7 +122,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen page-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors">
+    <div className="min-h-screen flocus-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors">
       <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col">
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
@@ -179,6 +186,7 @@ const Index = () => {
       </div>
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
+      <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <Toaster position="bottom-center" />
     </div>
   );
