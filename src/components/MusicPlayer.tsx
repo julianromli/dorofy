@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Music, Play, Pause, SkipForward, SkipBack, Volume2, Save, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Music, Play, Pause, SkipForward, SkipBack, Volume2, Save, X, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
@@ -28,14 +28,32 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       return [];
     }
   });
-  const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(null);
+  const [currentPlaylistId, setCurrentPlaylistId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('currentPlaylistId');
+    } catch (error) {
+      console.error('Error loading current playlist:', error);
+      return null;
+    }
+  });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Save playlists to localStorage
     localStorage.setItem('musicPlaylists', JSON.stringify(playlists));
   }, [playlists]);
+  
+  // Save current playlist ID to localStorage
+  useEffect(() => {
+    if (currentPlaylistId) {
+      localStorage.setItem('currentPlaylistId', currentPlaylistId);
+    } else {
+      localStorage.removeItem('currentPlaylistId');
+    }
+  }, [currentPlaylistId]);
 
   const detectSource = (url: string): 'spotify' | 'youtube' | 'soundcloud' | 'unknown' => {
     if (url.includes('spotify.com')) return 'spotify';
@@ -58,7 +76,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
           url.match(/youtube\.com\/watch\?v=([^&]+)/) || 
           url.match(/youtu\.be\/([^?]+)/);
         const videoId = ytMatch ? ytMatch[1] : '';
-        return `https://www.youtube.com/embed/${videoId}?autoplay=0`;
+        
+        // Check if it's a playlist
+        const playlistParam = url.includes('list=') ? `&list=${url.match(/list=([^&]+)/)?.[1] || ''}` : '';
+        
+        return `https://www.youtube.com/embed/${videoId}?autoplay=0${playlistParam}`;
       
       case 'soundcloud':
         // SoundCloud requires just the URL for embedding
@@ -95,7 +117,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       if (url.includes('/album/')) title = 'Spotify Album';
     } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
       title = 'YouTube Video';
-      if (url.includes('playlist')) title = 'YouTube Playlist';
+      if (url.includes('playlist') || url.includes('list=')) title = 'YouTube Playlist';
     } else if (url.includes('soundcloud.com')) {
       title = 'SoundCloud Track';
       if (url.includes('/sets/')) title = 'SoundCloud Playlist';
@@ -108,14 +130,32 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       source: source
     };
 
-    setPlaylists([...playlists, newPlaylist]);
+    setPlaylists(prev => [...prev, newPlaylist]);
     setUrl('');
     toast.success('Playlist added successfully');
+    
+    // If no current playlist is selected, set this as the current one
+    if (!currentPlaylistId) {
+      setCurrentPlaylistId(newPlaylist.id);
+      setIsPlaying(true);
+    }
   };
 
   const playPlaylist = (id: string) => {
-    setCurrentPlaylistId(id);
-    setIsPlaying(true);
+    if (id === currentPlaylistId) {
+      // Toggle play/pause if it's the current playlist
+      setIsPlaying(!isPlaying);
+    } else {
+      // Switch to a new playlist
+      setCurrentPlaylistId(id);
+      setIsPlaying(true);
+      
+      // Find the index of the playlist in the array
+      const index = playlists.findIndex(p => p.id === id);
+      if (index !== -1) {
+        setCurrentIndex(index);
+      }
+    }
   };
 
   const togglePlay = () => {
@@ -129,13 +169,50 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
     });
   };
 
+  const playNextTrack = () => {
+    if (playlists.length === 0) return;
+    
+    const nextIndex = (currentIndex + 1) % playlists.length;
+    setCurrentIndex(nextIndex);
+    setCurrentPlaylistId(playlists[nextIndex].id);
+    setIsPlaying(true);
+  };
+
+  const playPreviousTrack = () => {
+    if (playlists.length === 0) return;
+    
+    const prevIndex = (currentIndex - 1 + playlists.length) % playlists.length;
+    setCurrentIndex(prevIndex);
+    setCurrentPlaylistId(playlists[prevIndex].id);
+    setIsPlaying(true);
+  };
+
   const removePlaylist = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    // Find the index of the playlist to be removed
+    const index = playlists.findIndex(p => p.id === id);
+    
+    // Check if we're removing the currently playing playlist
     if (id === currentPlaylistId) {
-      setCurrentPlaylistId(null);
-      setIsPlaying(false);
+      if (playlists.length > 1) {
+        // Play the next playlist if available, or the previous one
+        const nextIndex = index < playlists.length - 1 ? index + 1 : index - 1;
+        setCurrentPlaylistId(playlists[nextIndex].id);
+        setCurrentIndex(nextIndex);
+      } else {
+        // If it's the only playlist, just clear the current playlist
+        setCurrentPlaylistId(null);
+        setIsPlaying(false);
+      }
+    } else if (index < currentIndex) {
+      // If we're removing a playlist that comes before the current one,
+      // adjust the current index to maintain the correct position
+      setCurrentIndex(currentIndex - 1);
     }
-    setPlaylists(playlists.filter(playlist => playlist.id !== id));
+    
+    // Remove the playlist
+    setPlaylists(prev => prev.filter(playlist => playlist.id !== id));
     toast.success('Playlist removed');
   };
 
@@ -150,6 +227,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       default:
         return '🎵';
     }
+  };
+
+  const handleReorder = (newOrder: Playlist[]) => {
+    // Find the new index of the current playlist
+    if (currentPlaylistId) {
+      const newIndex = newOrder.findIndex(p => p.id === currentPlaylistId);
+      if (newIndex !== -1) {
+        setCurrentIndex(newIndex);
+      }
+    }
+    
+    setPlaylists(newOrder);
   };
 
   return (
@@ -172,6 +261,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
             exit={{ x: -320 }}
             transition={{ type: 'spring', damping: 25, stiffness: 220 }}
             className="music-sidebar"
+            ref={containerRef}
           >
             <div className="p-4 border-b border-white/10">
               <div className="flex justify-between items-center mb-3">
@@ -181,7 +271,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1 rounded-full hover:bg-white/10"
-                  aria-label="Close music player"
+                  aria-label="Minimize music player"
                 >
                   <X className="h-5 w-5 text-white/70" />
                 </button>
@@ -214,71 +304,104 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {playlists.map((playlist) => (
-                    <div
-                      key={playlist.id}
-                      className={`playlist-card cursor-pointer hover:bg-white/5 transition-colors ${currentPlaylistId === playlist.id ? 'border-primary/50' : ''}`}
-                      onClick={() => playPlaylist(playlist.id)}
-                    >
-                      <div className="p-3 flex justify-between items-center">
-                        <div className="flex items-center">
-                          <span className="mr-2">{getSourceIcon(playlist.source)}</span>
-                          <span className="text-white truncate">{playlist.title}</span>
-                        </div>
-                        <button
-                          onClick={(e) => removePlaylist(playlist.id, e)}
-                          className="text-white/50 hover:text-white/80"
-                          aria-label="Remove playlist"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                      
-                      {currentPlaylistId === playlist.id && (
-                        <div className="p-2 bg-black/50 border-t border-white/10">
-                          <div className="aspect-video mb-2">
-                            <iframe
-                              ref={iframeRef}
-                              src={isPlaying ? playlist.url : ''}
-                              className="w-full h-full border-0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                              title="Music Player"
-                            ></iframe>
+                  <Reorder.Group axis="y" values={playlists} onReorder={handleReorder} className="space-y-3">
+                    {playlists.map((playlist) => (
+                      <Reorder.Item
+                        key={playlist.id}
+                        value={playlist}
+                        className={`playlist-card cursor-pointer hover:bg-white/5 transition-colors ${currentPlaylistId === playlist.id ? 'border-primary/50' : ''}`}
+                      >
+                        <div className="p-3 flex justify-between items-center group">
+                          <div className="flex items-center flex-1">
+                            <span className="drag-handle mr-2 opacity-50 group-hover:opacity-100">
+                              <GripVertical className="h-4 w-4 text-white/50" />
+                            </span>
+                            <span className="mr-2">{getSourceIcon(playlist.source)}</span>
+                            <span 
+                              className="text-white truncate"
+                              onClick={() => playPlaylist(playlist.id)}
+                            >
+                              {playlist.title}
+                            </span>
                           </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <div className="flex space-x-2">
-                              <button className="player-button">
-                                <SkipBack className="h-4 w-4" />
-                              </button>
-                              <button className="player-button" onClick={togglePlay}>
-                                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                              </button>
-                              <button className="player-button">
-                                <SkipForward className="h-4 w-4" />
-                              </button>
+                          <button
+                            onClick={(e) => removePlaylist(playlist.id, e)}
+                            className="text-white/50 hover:text-white/80"
+                            aria-label="Remove playlist"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                        
+                        {currentPlaylistId === playlist.id && (
+                          <div className="p-2 bg-black/50 border-t border-white/10">
+                            <div className="aspect-video mb-2 bg-black/70">
+                              <iframe
+                                ref={iframeRef}
+                                src={isPlaying ? playlist.url : ''}
+                                className="w-full h-full border-0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                                title="Music Player"
+                              ></iframe>
                             </div>
                             
-                            <button className="player-button">
-                              <Volume2 className="h-4 w-4" />
-                            </button>
+                            <div className="flex justify-between items-center">
+                              <div className="flex space-x-2">
+                                <button 
+                                  className="player-button" 
+                                  onClick={playPreviousTrack}
+                                  aria-label="Previous track"
+                                >
+                                  <SkipBack className="h-4 w-4" />
+                                </button>
+                                <button 
+                                  className="player-button" 
+                                  onClick={togglePlay}
+                                  aria-label={isPlaying ? "Pause" : "Play"}
+                                >
+                                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                                </button>
+                                <button 
+                                  className="player-button" 
+                                  onClick={playNextTrack}
+                                  aria-label="Next track"
+                                >
+                                  <SkipForward className="h-4 w-4" />
+                                </button>
+                              </div>
+                              
+                              <button className="player-button" aria-label="Volume">
+                                <Volume2 className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </Reorder.Item>
+                    ))}
+                  </Reorder.Group>
                 </div>
               )}
               
               <div className="mt-6 text-xs text-white/40 text-center">
-                Controls might vary based on the music platform.
+                Drag playlists to reorder them.
                 <br />Some platforms may restrict embed features.
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Hidden iframe for background play when sidebar is closed */}
+      {currentPlaylistId && !isOpen && isPlaying && (
+        <div className="hidden">
+          <iframe
+            src={playlists.find(p => p.id === currentPlaylistId)?.url || ''}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            title="Background Music Player"
+          ></iframe>
+        </div>
+      )}
     </>
   );
 };

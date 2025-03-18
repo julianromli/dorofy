@@ -33,3 +33,5 @@ export const useTheme = () => {
 
   return { theme, setTheme };
 };
+
+export default useTheme;

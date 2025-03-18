@@ -70,9 +70,9 @@ const Index = () => {
         modePrefix = '🟢 Long Break';
         break;
     }
-    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | ZenFocus`;
+    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | PomoBloom`;
     return () => {
-      document.title = 'ZenFocus - Pomodoro Timer';
+      document.title = 'PomoBloom - Pomodoro Timer';
     };
   }, [timerState.timeLeft, timerState.mode, formatTime]);
 

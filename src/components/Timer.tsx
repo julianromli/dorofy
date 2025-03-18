@@ -56,6 +56,17 @@ const Timer: React.FC<TimerProps> = ({
     }
   };
 
+  // Get motivational message based on timer mode
+  const getMotivationalMessage = () => {
+    if (mode === 'pomodoro') {
+      return "Let's make today count, Faiz Intifada!";
+    } else if (mode === 'shortBreak') {
+      return "Take a moment to breathe and recharge.";
+    } else {
+      return "Enjoy your well-deserved break!";
+    }
+  };
+
   // Listen for fullscreen change events (e.g., when user presses Escape)
   React.useEffect(() => {
     const handleFullscreenChange = () => {
@@ -78,6 +89,15 @@ const Timer: React.FC<TimerProps> = ({
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
+            <motion.p
+              className="personal-greeting"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              {getMotivationalMessage()}
+            </motion.p>
+            
             <motion.div 
               className="fullscreen-timer mb-10"
               key={timeString}
