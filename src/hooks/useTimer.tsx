@@ -88,7 +88,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
   // Set up audio for timer completion
   useEffect(() => {
     // Create audio element
-    audioRef.current = new Audio('/public/alarmbell.wav');
+    audioRef.current = new Audio('/alarmbell.wav');
     
     // Fix for iOS and Safari that require user interaction
     document.addEventListener('click', () => {
