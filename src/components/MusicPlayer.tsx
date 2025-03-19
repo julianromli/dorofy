@@ -31,8 +31,10 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPlaylistIndex, setCurrentPlaylistIndex] = useState(0);
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     localStorage.setItem('musicPlaylists', JSON.stringify(playlists));
@@ -40,32 +42,50 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      if (document.fullscreenElement && isOpen) {
-        const sidebar = sidebarRef.current;
-        if (sidebar) {
-          sidebar.style.transform = "translateX(0)";
-          sidebar.style.visibility = "visible";
-          sidebar.style.position = "fixed";
-          sidebar.style.zIndex = "9999";
-        }
+      setIsFullscreen(!!document.fullscreenElement);
+      
+      if (!document.fullscreenElement) {
+        updateSidebarVisibility(isOpen);
       }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
+    
+    const handleDorofyFullscreenChanged = (e: CustomEvent) => {
+      setIsFullscreen(e.detail.isFullscreen);
+      if (!e.detail.isFullscreen) {
+        updateSidebarVisibility(isOpen);
+      }
+    };
+    
+    document.addEventListener('dorofyFullscreenChanged', handleDorofyFullscreenChanged as EventListener);
+    
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('dorofyFullscreenChanged', handleDorofyFullscreenChanged as EventListener);
     };
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen || !currentPlaylistId) return;
-    
+    updateSidebarVisibility(isOpen);
+  }, [isOpen]);
+
+  const updateSidebarVisibility = (visible: boolean) => {
     const sidebar = sidebarRef.current;
-    if (sidebar) {
+    if (!sidebar) return;
+
+    if (visible) {
+      sidebar.style.transform = "translateX(0)";
+      sidebar.style.visibility = "visible";
+      if (isFullscreen) {
+        sidebar.style.position = "fixed";
+        sidebar.style.zIndex = "9999";
+      }
+    } else {
       sidebar.style.transform = "translateX(-100%)";
       sidebar.style.visibility = "hidden";
     }
-  }, [isOpen, currentPlaylistId]);
+  };
 
   const detectSource = (url: string): 'spotify' | 'youtube' | 'soundcloud' | 'unknown' => {
     if (url.includes('spotify.com')) return 'spotify';
@@ -223,14 +243,23 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
   };
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setTimeout(() => {
+      const newIsOpen = !isOpen;
+      setIsOpen(newIsOpen);
+      updateSidebarVisibility(newIsOpen);
+      
+      if (!newIsOpen && toggleButtonRef.current) {
+        toggleButtonRef.current.focus();
+      }
+    }, 10);
   };
 
   return (
     <>
       <button
+        ref={toggleButtonRef}
         onClick={toggleSidebar}
-        className="fixed bottom-4 left-4 z-50 p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg"
+        className={`fixed bottom-4 left-4 z-[10000] p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg ${isFullscreen ? 'fullscreen-toggle' : ''}`}
         aria-label={isOpen ? "Minimize music player" : "Open music player"}
       >
         <Music className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-white'}`} />
@@ -238,8 +267,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
 
       <div 
         ref={sidebarRef}
-        className={`music-sidebar ${isOpen ? 'music-sidebar-open' : 'music-sidebar-closed'}`}
-        style={{ visibility: isOpen ? 'visible' : 'hidden' }}
+        className={`music-sidebar ${isOpen ? 'music-sidebar-open' : 'music-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
       >
         <div className="p-4 border-b border-white/10">
           <div className="flex justify-between items-center mb-3">
@@ -292,7 +320,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
                   onDragOver={(e) => handleDragOver(e, playlist.id)}
                   onDragEnd={handleDragEnd}
                 >
-                  <div className="p-3 flex justify-between items-center">
+                  <div className="playlist-controls">
                     <div className="flex items-center">
                       <div className="mr-2 flex items-center">
                         <GripVertical className="h-4 w-4 text-white/30 mr-2 cursor-grab" />
@@ -311,48 +339,43 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
                       </button>
                     </div>
                   </div>
-                  
-                  {currentPlaylistId === playlist.id && (
-                    <div className="p-2 bg-black/50 border-t border-white/10">
-                      <div className="aspect-video mb-2">
-                        <iframe
-                          ref={iframeRef}
-                          src={isPlaying ? playlist.url : ''}
-                          className="w-full h-full border-0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title="Music Player"
-                        ></iframe>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex space-x-2">
-                          <button className="player-button" onClick={(e) => { e.stopPropagation(); playPrevious(); }}>
-                            <SkipBack className="h-4 w-4" />
-                          </button>
-                          <button className="player-button" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>
-                            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                          </button>
-                          <button className="player-button" onClick={(e) => { e.stopPropagation(); playNext(); }}>
-                            <SkipForward className="h-4 w-4" />
-                          </button>
-                        </div>
-                        
-                        <button className="player-button">
-                          <Volume2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           )}
           
-          <div className="mt-6 text-xs text-white/40 text-center">
-            Controls might vary based on the music platform.
-            <br />Some platforms may restrict embed features.
-          </div>
+          {currentPlaylistId && (
+            <div className="p-2 bg-black/50 border-t border-white/10 mt-4">
+              <div className="aspect-video mb-2">
+                <iframe
+                  ref={iframeRef}
+                  src={isPlaying ? playlists.find(p => p.id === currentPlaylistId)?.url : ''}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title="Music Player"
+                ></iframe>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <div className="flex space-x-2">
+                  <button className="player-button" onClick={(e) => { e.stopPropagation(); playPrevious(); }}>
+                    <SkipBack className="h-4 w-4" />
+                  </button>
+                  <button className="player-button" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>
+                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </button>
+                  <button className="player-button" onClick={(e) => { e.stopPropagation(); playNext(); }}>
+                    <SkipForward className="h-4 w-4" />
+                  </button>
+                </div>
+                
+                <button className="player-button">
+                  <Volume2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

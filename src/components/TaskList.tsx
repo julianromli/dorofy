@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CheckCircle, Circle, Trash2, MoreVertical, Edit, CheckCheck } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
@@ -32,7 +31,7 @@ const TaskList: React.FC<TaskListProps> = ({
   if (tasks.length === 0) {
     return (
       <div className="mt-6 p-6 text-center border border-mono-200 dark:border-mono-700 rounded-lg">
-        <p className="text-mono-500 dark:text-mono-400">No tasks yet. Add your first task to get started!</p>
+        <p className="text-gray-700 dark:text-mono-400">No tasks yet. Add your first task to get started!</p>
       </div>
     );
   }

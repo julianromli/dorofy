@@ -74,6 +74,15 @@ const Timer: React.FC<TimerProps> = ({
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
         setIsFullscreen(true);
+        
+        // Ensure we give the fullscreen event enough time to propagate
+        setTimeout(() => {
+          // Dispatch a custom event that the music player can listen for
+          const event = new CustomEvent('dorofyFullscreenChanged', { 
+            detail: { isFullscreen: true } 
+          });
+          document.dispatchEvent(event);
+        }, 100);
       }).catch(err => {
         console.error('Error attempting to enable fullscreen mode:', err);
       });
@@ -81,6 +90,15 @@ const Timer: React.FC<TimerProps> = ({
       if (document.exitFullscreen) {
         document.exitFullscreen().then(() => {
           setIsFullscreen(false);
+          
+          // Ensure we give the fullscreen event enough time to propagate
+          setTimeout(() => {
+            // Dispatch a custom event that the music player can listen for
+            const event = new CustomEvent('dorofyFullscreenChanged', { 
+              detail: { isFullscreen: false } 
+            });
+            document.dispatchEvent(event);
+          }, 100);
         }).catch(err => {
           console.error('Error attempting to exit fullscreen mode:', err);
         });
@@ -92,6 +110,12 @@ const Timer: React.FC<TimerProps> = ({
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
+      
+      // Dispatch event for other components that need to respond to fullscreen changes
+      const event = new CustomEvent('dorofyFullscreenChanged', { 
+        detail: { isFullscreen: !!document.fullscreenElement } 
+      });
+      document.dispatchEvent(event);
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);

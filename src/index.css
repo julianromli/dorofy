@@ -206,19 +206,26 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* Ensure music sidebar visibility in fullscreen mode */
-.fullscreen-mode ~ .music-sidebar-open {
-  visibility: visible !important;
-  transform: translateX(0) !important;
+/* Only apply higher z-index in fullscreen mode, but don't force visibility */
+.fullscreen-mode ~ .music-sidebar,
+.fullscreen-mode ~ div > .music-sidebar,
+.fullscreen-sidebar {
   z-index: 9999 !important;
 }
 
+/* These classes control visibility based on the isOpen state */
 .music-sidebar-open {
   @apply translate-x-0;
+  visibility: visible !important;
 }
 
 .music-sidebar-closed {
   @apply -translate-x-full;
+  visibility: hidden !important;
+}
+
+.fullscreen-toggle {
+  z-index: 10000 !important;
 }
 
 .playlist-card {
@@ -226,7 +233,7 @@
 }
 
 .playlist-controls {
-  @apply flex items-center justify-between p-2 bg-black/60;
+  @apply flex justify-between items-center p-3;
 }
 
 .player-button {
