@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 
 interface BackgroundData {
@@ -8,6 +9,24 @@ interface BackgroundData {
 
 const BackgroundRenderer: React.FC = () => {
   const [activeBackground, setActiveBackground] = useState<BackgroundData | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    // Listen for fullscreen changes
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('dorofyFullscreenChanged', (e: any) => {
+      setIsFullscreen(e.detail.isFullscreen);
+    });
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
+    };
+  }, []);
 
   useEffect(() => {
     // Load the active background from localStorage
@@ -77,6 +96,10 @@ const BackgroundRenderer: React.FC = () => {
 
   if (!activeBackground) return null;
 
+  const overlayClass = isFullscreen 
+    ? "custom-background-overlay fullscreen-overlay" 
+    : "custom-background-overlay";
+
   return (
     <div className="custom-background-container">
       <div className="custom-background">
@@ -109,7 +132,7 @@ const BackgroundRenderer: React.FC = () => {
           ></iframe>
         )}
       </div>
-      <div className="custom-background-overlay" aria-hidden="true"></div>
+      <div className={overlayClass} aria-hidden="true"></div>
     </div>
   );
 };

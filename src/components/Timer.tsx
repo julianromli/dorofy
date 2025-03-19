@@ -124,10 +124,16 @@ const Timer: React.FC<TimerProps> = ({
     };
   }, []);
 
+  // Determine if a custom background is active
+  const hasCustomBackground = document.documentElement.classList.contains('has-custom-background');
+
+  // Set additional class for custom background in fullscreen mode
+  const fullscreenClass = hasCustomBackground ? 'fullscreen-mode custom-bg-fullscreen' : `fullscreen-mode ${getBgClass()}`;
+
   return (
     <>
       {isFullscreen ? (
-        <div className={`fullscreen-mode ${getBgClass()}`}>
+        <div className={fullscreenClass}>
           <motion.div 
             className="flex flex-col items-center justify-center p-4 md:p-8 text-center w-full max-w-full"
             initial={{ opacity: 0 }}

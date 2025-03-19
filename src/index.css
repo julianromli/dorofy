@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -264,6 +265,11 @@
   pointer-events: none;
 }
 
+/* Add a separate class for fullscreen overlay with custom background */
+.fullscreen-overlay {
+  background: rgba(0, 0, 0, 0.65); /* Darker overlay for fullscreen */
+}
+
 /* When custom background is active, hide default backgrounds */
 .has-custom-background {
   background: none !important;
@@ -301,21 +307,21 @@
   opacity: 0;
 }
 
-.playlist-card {
-  @apply bg-black/50 rounded-md overflow-hidden mb-3 border border-white/10;
+/* Ensure fullscreen content is properly visible with custom backgrounds */
+.fullscreen-mode {
+  position: relative;
+  z-index: 50;
 }
 
-.playlist-controls {
-  @apply flex justify-between items-center p-3;
+.fullscreen-mode .text-white,
+.fullscreen-mode .text-white\/80,
+.fullscreen-mode .text-white\/60 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.player-button {
-  @apply p-2 text-white/70 hover:text-white/100 transition-colors;
-}
-
-/* Large timer in fullscreen mode */
 .fullscreen-timer {
   @apply text-[14rem] font-bold text-white tracking-tight;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Make timer responsive in mobile view */
