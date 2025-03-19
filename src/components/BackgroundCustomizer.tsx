@@ -117,10 +117,56 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
     return null;
   };
 
+  const validateImageUrl = async (url: string): Promise<boolean> => {
+    try {
+      // Check if it's a data URL
+      if (url.startsWith('data:')) return true;
+
+      // Check if it's a valid URL
+      const urlObj = new URL(url);
+      
+      // Check if it's from a trusted source
+      const trustedDomains = [
+        'unsplash.com',
+        'pexels.com',
+        'images.unsplash.com',
+        'images.pexels.com',
+        'google.com',
+        'googleusercontent.com',
+        'giphy.com',
+        'tenor.com',
+        'imgur.com',
+        'i.imgur.com'
+      ];
+
+      const isTrustedDomain = trustedDomains.some(domain => 
+        urlObj.hostname.includes(domain)
+      );
+
+      if (!isTrustedDomain) {
+        toast.warning('This image source is not from a trusted domain. It may not work as expected.');
+      }
+
+      // Try to fetch the image to validate it exists and is accessible
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error validating image URL:', error);
+      return false;
+    }
+  };
+
   const getTypeFromUrl = (url: string): 'image' | 'video' | 'youtube' => {
-    if (url.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
+    // Check for data URLs first
+    if (url.startsWith('data:')) {
+      if (url.startsWith('data:image/')) return 'image';
+      if (url.startsWith('data:video/')) return 'video';
+    }
+
+    // Check file extensions
+    if (url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
       return 'image';
-    } else if (url.match(/\.(mp4|webm|ogg)$/i)) {
+    } else if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
       return 'video';
     } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
       return 'youtube';
@@ -170,7 +216,7 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
     }
   };
 
-  const handleUrlSubmit = (e: React.FormEvent) => {
+  const handleUrlSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!url.trim()) {
@@ -190,6 +236,13 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
           return;
         }
         finalUrl = embedUrl;
+      } else {
+        // Validate image/video URL
+        const isValid = await validateImageUrl(url);
+        if (!isValid) {
+          toast.error('Invalid or inaccessible URL. Please check the URL and try again.');
+          return;
+        }
       }
 
       const newBackground: BackgroundData = {
@@ -265,20 +318,20 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
       <button
         ref={toggleButtonRef}
         onClick={toggleSidebar}
-        className={`fixed bottom-16 left-4 z-[9999] p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg ${isFullscreen ? 'fullscreen-toggle' : ''}`}
+        className={`fixed bottom-4 left-4 z-[10000] p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg translate-y-[-60px] ${isFullscreen ? 'fullscreen-toggle' : ''}`}
         aria-label={isOpen ? "Close background customizer" : "Open background customizer"}
       >
         <Image className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-white'}`} />
       </button>
 
-      <div 
+      <div
         ref={sidebarRef}
         className={`background-sidebar ${isOpen ? 'background-sidebar-open' : 'background-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
       >
         <div className="p-4 border-b border-white/10">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-xl font-bold text-white flex items-center">
-              <Image className="mr-2 h-5 w-5" /> Background Customizer
+              <Image className="mr-2 h-5 w-5" /> Custom Background
             </h2>
             <button
               onClick={() => setIsOpen(false)}
@@ -290,7 +343,7 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/70 mb-2">Upload Image or Video</h3>
+            <h3 className="text-sm font-medium text-white/70 mb-2">Add Background</h3>
             <input
               type="file"
               ref={fileInputRef}
@@ -339,7 +392,7 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
               </Button>
             )}
           </div>
-          
+
           {backgrounds.length === 0 ? (
             <div className="text-white/50 text-sm p-3 text-center">
               No backgrounds added yet
