@@ -32,7 +32,7 @@ const AddTask: React.FC<AddTaskProps> = ({ onAddTask }) => {
     return (
       <button
         onClick={() => setIsAdding(true)}
-        className="w-full flex items-center justify-center py-3 mt-4 border-2 border-dashed border-mono-300 dark:border-mono-700 rounded-lg text-gray-700 dark:text-mono-400 hover:bg-mono-100 dark:hover:bg-mono-800 transition-colors group"
+        className="w-full flex items-center justify-center py-3 mt-4 border-2 border-dashed border-white/20 rounded-lg text-white/70 hover:bg-black/30 hover:text-white backdrop-blur-sm transition-colors group"
         aria-label="Add task"
       >
         <Plus className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
@@ -43,19 +43,19 @@ const AddTask: React.FC<AddTaskProps> = ({ onAddTask }) => {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 animate-scale-in">
-      <div className="w-full p-4 bg-white dark:bg-mono-800 rounded-lg shadow-soft transition-all">
+      <div className="w-full p-4 bg-black/50 backdrop-blur-md rounded-lg shadow-lg border border-white/10 transition-all">
         <div className="flex flex-col">
           <input
             type="text"
             value={taskTitle}
             onChange={(e) => setTaskTitle(e.target.value)}
             placeholder="What are you working on?"
-            className="w-full px-3 py-2 mb-3 bg-mono-100 dark:bg-mono-700 rounded-md focus:outline-none focus:ring-1 focus:ring-pomodoro dark:focus:ring-pomodoro-light"
+            className="w-full px-3 py-2 mb-3 bg-black/50 border border-white/10 text-white placeholder-white/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             autoFocus
           />
           
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm text-mono-600 dark:text-mono-400">
+            <label className="text-sm text-white/70">
               Estimated Pomodoros
             </label>
             
@@ -63,21 +63,21 @@ const AddTask: React.FC<AddTaskProps> = ({ onAddTask }) => {
               <button
                 type="button"
                 onClick={decrementPomodoros}
-                className="p-1 text-mono-500 dark:text-mono-400 hover:text-mono-700 dark:hover:text-mono-200"
+                className="p-1 text-white/60 hover:text-white"
                 aria-label="Reduce pomodoros"
                 disabled={estimatedPomodoros <= 1}
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
               
-              <span className="w-8 text-center font-medium">
+              <span className="w-8 text-center font-medium text-white">
                 {estimatedPomodoros}
               </span>
               
               <button
                 type="button"
                 onClick={incrementPomodoros}
-                className="p-1 text-mono-500 dark:text-mono-400 hover:text-mono-700 dark:hover:text-mono-200"
+                className="p-1 text-white/60 hover:text-white"
                 aria-label="Add pomodoros"
                 disabled={estimatedPomodoros >= 10}
               >
@@ -90,7 +90,7 @@ const AddTask: React.FC<AddTaskProps> = ({ onAddTask }) => {
             <button
               type="button"
               onClick={() => setIsAdding(false)}
-              className="px-4 py-2 text-mono-500 hover:bg-mono-200 dark:hover:bg-mono-700 rounded-md transition-colors"
+              className="px-4 py-2 text-white/70 hover:bg-white/10 rounded-md transition-colors"
               aria-label="Cancel"
             >
               Cancel
@@ -98,7 +98,7 @@ const AddTask: React.FC<AddTaskProps> = ({ onAddTask }) => {
             
             <button
               type="submit"
-              className="px-4 py-2 bg-pomodoro text-white rounded-md hover:bg-pomodoro-dark transition-colors"
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
               aria-label="Save task"
               disabled={!taskTitle.trim()}
             >

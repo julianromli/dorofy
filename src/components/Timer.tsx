@@ -202,7 +202,7 @@ const Timer: React.FC<TimerProps> = ({
         </div>
       ) : (
         <div className="w-full rounded-2xl shadow-lg overflow-hidden relative">
-          <div className={`w-full p-6 md:p-8 ${getBgClass()}`}>
+          <div className={`w-full p-6 md:p-8 ${getBgClass()} backdrop-blur-md bg-black/40`}>
             <motion.div 
               className="flex flex-col items-center justify-center"
               initial={{ opacity: 0, y: 10 }}

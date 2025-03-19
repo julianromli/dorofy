@@ -30,8 +30,8 @@ const TaskList: React.FC<TaskListProps> = ({
   
   if (tasks.length === 0) {
     return (
-      <div className="mt-6 p-6 text-center border border-mono-200 dark:border-mono-700 rounded-lg">
-        <p className="text-gray-700 dark:text-mono-400">No tasks yet. Add your first task to get started!</p>
+      <div className="mt-6 p-6 text-center border border-white/10 rounded-lg bg-black/40 backdrop-blur-md shadow-lg text-white">
+        <p className="text-white/70">No tasks yet. Add your first task to get started!</p>
       </div>
     );
   }
@@ -43,10 +43,10 @@ const TaskList: React.FC<TaskListProps> = ({
         {activeTasks.map(task => (
           <div
             key={task.id}
-            className={`relative group p-4 rounded-lg transition-all duration-300 ${
+            className={`relative group p-4 rounded-lg backdrop-blur-md transition-all duration-300 ${
               task.id === activeTaskId
-                ? 'bg-mono-100 dark:bg-mono-800 shadow-soft'
-                : 'bg-white dark:bg-mono-900 hover:bg-mono-50 dark:hover:bg-mono-800'
+                ? 'bg-black/60 border border-white/20 shadow-lg'
+                : 'bg-black/40 border border-white/10 hover:bg-black/50'
             }`}
           >
             <div className="flex items-start justify-between">
@@ -55,7 +55,7 @@ const TaskList: React.FC<TaskListProps> = ({
                 onClick={() => onSetActive(task.id)}
               >
                 <button
-                  className="mt-1 mr-3 text-mono-400 hover:text-pomodoro dark:text-mono-500 dark:hover:text-pomodoro-light transition-colors"
+                  className="mt-1 mr-3 text-white/60 hover:text-primary dark:hover:text-primary transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     onToggleComplete(task.id);
@@ -70,13 +70,13 @@ const TaskList: React.FC<TaskListProps> = ({
                 </button>
                 
                 <div className="flex-1">
-                  <h3 className={`font-medium ${
-                    task.completed ? 'text-mono-400 line-through' : ''
+                  <h3 className={`font-medium text-white ${
+                    task.completed ? 'text-white/50 line-through' : ''
                   }`}>
                     {task.title}
                   </h3>
                   
-                  <div className="mt-1 text-xs text-mono-500 dark:text-mono-400">
+                  <div className="mt-1 text-xs text-white/60">
                     {task.completedPomodoros} / {task.estimatedPomodoros} pomodoros
                   </div>
                 </div>
@@ -85,20 +85,20 @@ const TaskList: React.FC<TaskListProps> = ({
               <div className="relative">
                 <button
                   onClick={() => handleMenuToggle(task.id)}
-                  className="p-1 text-mono-400 hover:text-mono-600 dark:hover:text-mono-300 rounded-full hover:bg-mono-200 dark:hover:bg-mono-700 transition-colors"
+                  className="p-1 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors"
                   aria-label="Task options"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </button>
                 
                 {openMenuId === task.id && (
-                  <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-mono-800 rounded-md shadow-md py-1 z-10">
+                  <div className="absolute right-0 mt-1 w-36 bg-black/80 backdrop-blur-md rounded-md shadow-md py-1 z-10 border border-white/10">
                     <button
                       onClick={() => {
                         onDelete(task.id);
                         setOpenMenuId(null);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm flex items-center text-red-500 hover:bg-mono-100 dark:hover:bg-mono-700"
+                      className="w-full px-4 py-2 text-left text-sm flex items-center text-red-400 hover:bg-black/60"
                       aria-label="Delete task"
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
@@ -116,13 +116,13 @@ const TaskList: React.FC<TaskListProps> = ({
       {completedTasks.length > 0 && (
         <div className="pt-2">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-mono-500 dark:text-mono-400">
+            <h3 className="text-sm font-medium text-white/70">
               Completed ({completedTasks.length})
             </h3>
             
             <button
               onClick={onClearCompleted}
-              className="text-xs text-mono-500 hover:text-mono-700 dark:text-mono-400 dark:hover:text-mono-200 flex items-center"
+              className="text-xs text-white/60 hover:text-white flex items-center"
               aria-label="Clear all completed tasks"
             >
               <CheckCheck className="w-3 h-3 mr-1" />
@@ -134,12 +134,12 @@ const TaskList: React.FC<TaskListProps> = ({
             {completedTasks.map(task => (
               <div
                 key={task.id}
-                className="group p-4 rounded-lg bg-white dark:bg-mono-900 hover:bg-mono-50 dark:hover:bg-mono-800 transition-all duration-300"
+                className="group p-4 rounded-lg bg-black/30 backdrop-blur-md border border-white/5 hover:bg-black/40 transition-all duration-300"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start">
                     <button
-                      className="mt-1 mr-3 text-pomodoro dark:text-pomodoro-light hover:text-pomodoro-dark transition-colors"
+                      className="mt-1 mr-3 text-primary/80 hover:text-primary transition-colors"
                       onClick={() => onToggleComplete(task.id)}
                       aria-label="Mark as incomplete"
                     >
@@ -147,11 +147,11 @@ const TaskList: React.FC<TaskListProps> = ({
                     </button>
                     
                     <div>
-                      <h3 className="font-medium text-mono-400 line-through">
+                      <h3 className="font-medium text-white/50 line-through">
                         {task.title}
                       </h3>
                       
-                      <div className="mt-1 text-xs text-mono-400">
+                      <div className="mt-1 text-xs text-white/40">
                         {task.completedPomodoros} / {task.estimatedPomodoros} pomodoros
                       </div>
                     </div>
@@ -159,7 +159,7 @@ const TaskList: React.FC<TaskListProps> = ({
                   
                   <button
                     onClick={() => onDelete(task.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-mono-400 hover:text-red-500 rounded-full hover:bg-mono-200 dark:hover:bg-mono-700 transition-all"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-white/40 hover:text-red-400 rounded-full hover:bg-white/10 transition-all"
                     aria-label="Delete task"
                   >
                     <Trash2 className="w-4 h-4" />

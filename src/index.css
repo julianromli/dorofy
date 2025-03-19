@@ -206,26 +206,99 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
+/* Background customizer sidebar */
+.background-sidebar {
+  @apply fixed top-0 left-0 bottom-0 w-80 bg-black/90 z-40 transform transition-transform duration-300 overflow-y-auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
 /* Only apply higher z-index in fullscreen mode, but don't force visibility */
 .fullscreen-mode ~ .music-sidebar,
 .fullscreen-mode ~ div > .music-sidebar,
+.fullscreen-mode ~ .background-sidebar,
+.fullscreen-mode ~ div > .background-sidebar,
 .fullscreen-sidebar {
   z-index: 9999 !important;
 }
 
 /* These classes control visibility based on the isOpen state */
-.music-sidebar-open {
+.music-sidebar-open,
+.background-sidebar-open {
   @apply translate-x-0;
   visibility: visible !important;
 }
 
-.music-sidebar-closed {
+.music-sidebar-closed,
+.background-sidebar-closed {
   @apply -translate-x-full;
   visibility: hidden !important;
 }
 
 .fullscreen-toggle {
   z-index: 10000 !important;
+}
+
+/* Main content z-index should be higher than background but lower than controls */
+.app-content {
+  @apply relative z-10;
+}
+
+/* Custom background styles */
+.custom-background {
+  @apply fixed inset-0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.custom-background-image,
+.custom-background-video {
+  @apply w-full h-full object-cover;
+}
+
+.custom-background-overlay {
+  @apply fixed inset-0 bg-black/50;
+  width: 100%; 
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* When custom background is active, hide default backgrounds */
+.has-custom-background {
+  background: none !important;
+}
+
+.has-custom-background .flocus-gradient,
+.has-custom-background .dark\:bg-gradient-to-b,
+.has-custom-background .pomodoro-gradient,
+.has-custom-background .shortbreak-gradient,
+.has-custom-background .longbreak-gradient {
+  background: none !important;
+}
+
+/* Background wrapper to ensure custom backgrounds override defaults */
+.background-wrapper {
+  @apply fixed inset-0;
+  z-index: -2;
+}
+
+/* Default background container */
+.default-background {
+  @apply fixed inset-0;
+  z-index: -3;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Ensure custom background has higher z-index than default background */
+.custom-background-container {
+  @apply fixed inset-0;
+  z-index: -1;
+}
+
+/* Transition for smooth background changes */
+.has-custom-background .default-background {
+  opacity: 0;
 }
 
 .playlist-card {

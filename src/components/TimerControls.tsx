@@ -10,7 +10,7 @@ interface TimerControlsProps {
 const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }) => {
   return (
     <div className="w-full flex justify-center p-2 mb-4">
-      <div className="flex items-center space-x-1 bg-white/10 dark:bg-black/20 p-1 rounded-full shadow-sm">
+      <div className="flex items-center space-x-1 bg-black/40 backdrop-blur-md p-1 rounded-full shadow-md border border-white/10">
         <div className="relative">
           <button
             onClick={() => switchMode('pomodoro')}

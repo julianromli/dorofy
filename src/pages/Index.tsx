@@ -7,6 +7,8 @@ import TaskList from '@/components/TaskList';
 import AddTask from '@/components/AddTask';
 import HowToUse from '@/components/HowToUse';
 import MusicPlayer from '@/components/MusicPlayer';
+import BackgroundCustomizer from '@/components/BackgroundCustomizer';
+import BackgroundRenderer from '@/components/BackgroundRenderer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import { useTheme } from '@/hooks/useTheme';
@@ -23,6 +25,7 @@ const Index = () => {
   });
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
+  const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
   
   const { theme, setTheme } = useTheme();
   
@@ -124,8 +127,14 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flocus-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors">
-      <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col">
+    <div className="min-h-screen relative">
+      {/* Default background container */}
+      <div className="default-background flocus-gradient dark:bg-gradient-to-b dark:from-[#150A30] dark:to-[#1A0A37] transition-colors"></div>
+      
+      {/* Background renderer must be placed before the content */}
+      <BackgroundRenderer />
+      
+      <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col relative z-10 app-content">
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
           toggleLongPomodoro={toggleLongPomodoro} 
@@ -155,7 +164,7 @@ const Index = () => {
           
           <motion.div variants={itemVariants}>
             {activeTaskId && (
-              <div className="mt-4 px-4 py-3 bg-white/10 dark:bg-white/5 rounded-lg backdrop-blur-sm">
+              <div className="mt-4 px-4 py-3 bg-black/50 rounded-lg backdrop-blur-md border border-white/10 shadow-lg">
                 <h3 className="text-sm font-medium text-white/60">
                   CURRENT TASK
                 </h3>
@@ -189,6 +198,7 @@ const Index = () => {
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
+      <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
       <Toaster />
     </div>
   );
