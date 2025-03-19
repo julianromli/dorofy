@@ -8,6 +8,7 @@ import AddTask from '@/components/AddTask';
 import HowToUse from '@/components/HowToUse';
 import MusicPlayer from '@/components/MusicPlayer';
 import BackgroundCustomizer from '@/components/BackgroundCustomizer';
+import DonationButton from '@/components/DonationButton';
 import BackgroundRenderer from '@/components/BackgroundRenderer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
@@ -214,7 +215,7 @@ const Index = () => {
         {!isFullscreen && (
           <footer className="footer text-center">
             <p>
-              2025 &copy; Made with 💖 by Faiz Intifada
+              2025 &copy; Made with 💖 by <a href="https://instagram.com/faizintifada" target="_blank" rel="noopener noreferrer" className="">Faiz Intifada</a>
             </p>
           </footer>
         )}
@@ -223,6 +224,7 @@ const Index = () => {
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
+      <DonationButton />
       <Toaster />
     </div>
   );
