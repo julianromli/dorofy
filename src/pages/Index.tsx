@@ -26,6 +26,7 @@ const Index = () => {
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const { theme, setTheme } = useTheme();
   
@@ -95,6 +96,18 @@ const Index = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [timerState.isRunning]);
+
+  // Listen for fullscreen changes from Timer component
+  useEffect(() => {
+    const handleFullscreenChange = (e: CustomEvent) => {
+      setIsFullscreen(e.detail.isFullscreen);
+    };
+
+    document.addEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
+    return () => {
+      document.removeEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
+    };
+  }, []);
   
   const toggleLongPomodoro = () => {
     setIsLongPomodoro(!isLongPomodoro);
@@ -138,7 +151,8 @@ const Index = () => {
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
           toggleLongPomodoro={toggleLongPomodoro} 
-          isLongPomodoro={isLongPomodoro} 
+          isLongPomodoro={isLongPomodoro}
+          isFullscreen={isFullscreen}
         />
         
         <motion.div 
@@ -147,9 +161,13 @@ const Index = () => {
           animate="visible" 
           className="mt-6 flex-1 flex flex-col"
         >
-          <motion.div variants={itemVariants}>
-            <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
-          </motion.div>
+          {!isFullscreen && (
+            <>
+              <motion.div variants={itemVariants}>
+                <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
+              </motion.div>
+            </>
+          )}
           
           <motion.div variants={itemVariants}>
             <Timer 
@@ -162,38 +180,44 @@ const Index = () => {
             />
           </motion.div>
           
-          <motion.div variants={itemVariants}>
-            {activeTaskId && (
-              <div className="mt-4 px-4 py-3 bg-black/50 rounded-lg backdrop-blur-md border border-white/10 shadow-lg">
-                <h3 className="text-sm font-medium text-white/60">
-                  CURRENT TASK
-                </h3>
-                <p className="font-medium mt-1 text-white">
-                  {tasks.find(task => task.id === activeTaskId)?.title}
-                </p>
-              </div>
-            )}
-          </motion.div>
-          
-          <motion.div variants={itemVariants} className="mt-6 flex-1">
-            <h2 className="text-lg font-semibold mb-3 text-white">Tasks</h2>
-            <TaskList 
-              tasks={tasks} 
-              activeTaskId={activeTaskId} 
-              onToggleComplete={toggleTaskCompletion} 
-              onSetActive={setActiveTask} 
-              onDelete={deleteTask} 
-              onClearCompleted={clearCompletedTasks} 
-            />
-            <AddTask onAddTask={addTask} />
-          </motion.div>
+          {!isFullscreen && (
+            <>
+              <motion.div variants={itemVariants}>
+                {activeTaskId && (
+                  <div className="mt-4 px-4 py-3 bg-black/50 rounded-lg backdrop-blur-md border border-white/10 shadow-lg">
+                    <h3 className="text-sm font-medium text-white/60">
+                      CURRENT TASK
+                    </h3>
+                    <p className="font-medium mt-1 text-white">
+                      {tasks.find(task => task.id === activeTaskId)?.title}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+              
+              <motion.div variants={itemVariants} className="mt-6 flex-1">
+                <h2 className="text-lg font-semibold mb-3 text-white">Tasks</h2>
+                <TaskList 
+                  tasks={tasks} 
+                  activeTaskId={activeTaskId} 
+                  onToggleComplete={toggleTaskCompletion} 
+                  onSetActive={setActiveTask} 
+                  onDelete={deleteTask} 
+                  onClearCompleted={clearCompletedTasks} 
+                />
+                <AddTask onAddTask={addTask} />
+              </motion.div>
+            </>
+          )}
         </motion.div>
         
-        <footer className="footer text-center">
-          <p>
-            2025 &copy; Made with 💖 by Faiz Intifada
-          </p>
-        </footer>
+        {!isFullscreen && (
+          <footer className="footer text-center">
+            <p>
+              2025 &copy; Made with 💖 by Faiz Intifada
+            </p>
+          </footer>
+        )}
       </div>
       
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />

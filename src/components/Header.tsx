@@ -6,9 +6,17 @@ interface HeaderProps {
   openHowToUse: () => void;
   toggleLongPomodoro: () => void;
   isLongPomodoro: boolean;
+  isFullscreen?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ openHowToUse, toggleLongPomodoro, isLongPomodoro }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  openHowToUse, 
+  toggleLongPomodoro, 
+  isLongPomodoro,
+  isFullscreen = false 
+}) => {
+  if (isFullscreen) return null;
+
   return (
     <header className="w-full flex justify-between items-center px-4 py-4 animate-fade-in">
       <div className="flex items-center space-x-2">
