@@ -77,7 +77,7 @@ const Index = () => {
         modePrefix = '🟢 Long Break';
         break;
     }
-    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) | Dorofy`;
+    document.title = `${modePrefix} (${formatTime(timerState.timeLeft)}) - Dorofy`;
     return () => {
       document.title = 'Dorofy - Pomodoro Timer';
     };
@@ -215,7 +215,7 @@ const Index = () => {
         {!isFullscreen && (
           <footer className="footer text-center">
             <p>
-              2025 &copy; Made with 💖 by <a href="https://instagram.com/faizintifada" target="_blank" rel="noopener noreferrer" className="">Faiz Intifada</a>
+              2025 &copy; Made with 💗 by <a href="https://instagram.com/faizintifada" target="_blank" rel="noopener noreferrer" className="">Faiz Intifada</a>
             </p>
           </footer>
         )}
