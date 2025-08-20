@@ -14,7 +14,6 @@ import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
 import AnalyticsSheet from '@/components/AnalyticsSheet';
-import { useTheme } from '@/hooks/useTheme';
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
@@ -30,8 +29,6 @@ const Index = () => {
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const { theme, setTheme } = useTheme();
 
   const {
     tasks,
@@ -64,11 +61,6 @@ const Index = () => {
     formatTime
   } = useTimer(isLongPomodoro, handlePomodoroComplete);
 
-
-  // Set dark mode by default
-  useEffect(() => {
-    setTheme('dark');
-  }, [setTheme]);
 
   // Save long pomodoro preference
   useEffect(() => {

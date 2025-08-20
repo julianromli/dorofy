@@ -1,6 +1,5 @@
 import React from 'react';
 import { Clock, HelpCircle, BarChartHorizontal } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   openHowToUse: () => void;
@@ -35,8 +34,6 @@ const Header: React.FC<HeaderProps> = ({
           {isLongPomodoro ? '50 min' : '25 min'}
         </button>
         
-        <ThemeToggle />
-
         <button
           onClick={openAnalytics}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
