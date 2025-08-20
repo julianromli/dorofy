@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { TimerMode } from '@/hooks/useTimer';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, Maximize, Minimize } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TimerProps {
@@ -23,28 +22,9 @@ const Timer: React.FC<TimerProps> = ({
   onReset
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { theme } = useTheme();
   const isMobile = useIsMobile();
 
   const getBgClass = () => {
-    if (isFullscreen) {
-      if (theme === 'dark') {
-        switch (mode) {
-          case 'pomodoro':
-            return 'pomodoro-gradient';
-          case 'shortBreak':
-            return 'shortbreak-gradient';
-          case 'longBreak':
-            return 'longbreak-gradient';
-          default:
-            return 'pomodoro-gradient';
-        }
-      } else {
-        // For light theme in fullscreen
-        return 'fullscreen-gradient';
-      }
-    }
-    
     switch (mode) {
       case 'pomodoro':
         return 'pomodoro-gradient';

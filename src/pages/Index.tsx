@@ -13,11 +13,11 @@ import BackgroundRenderer from '@/components/BackgroundRenderer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
-import { useTheme } from '@/hooks/useTheme';
-import { Heart } from 'lucide-react';
+import AnalyticsSheet from '@/components/AnalyticsSheet';
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
+  const [analyticsSheetOpen, setAnalyticsSheetOpen] = useState(false);
   const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
     try {
       return localStorage.getItem('isLongPomodoro') === 'true';
@@ -29,8 +29,6 @@ const Index = () => {
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  
-  const { theme, setTheme } = useTheme();
 
   const {
     tasks,
@@ -43,7 +41,8 @@ const Index = () => {
     setActiveTask,
     clearCompletedTasks
   } = useTasks();
-  const { addPomodoroSession } = usePomodoroHistory();
+
+  const { history: pomodoroHistory, addPomodoroSession } = usePomodoroHistory();
 
   function handlePomodoroComplete(duration: number) {
     if (activeTaskId) {
@@ -62,10 +61,6 @@ const Index = () => {
     formatTime
   } = useTimer(isLongPomodoro, handlePomodoroComplete);
 
-  // Set dark mode by default
-  useEffect(() => {
-    setTheme('dark');
-  }, [setTheme]);
 
   // Save long pomodoro preference
   useEffect(() => {
@@ -118,7 +113,7 @@ const Index = () => {
       document.removeEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
     };
   }, []);
-  
+
   const toggleLongPomodoro = () => {
     setIsLongPomodoro(!isLongPomodoro);
   };
@@ -160,6 +155,7 @@ const Index = () => {
       <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col relative z-10 app-content">
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
+          openAnalytics={() => setAnalyticsSheetOpen(true)}
           toggleLongPomodoro={toggleLongPomodoro} 
           isLongPomodoro={isLongPomodoro}
           isFullscreen={isFullscreen}
@@ -233,6 +229,12 @@ const Index = () => {
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
+      <AnalyticsSheet
+        isOpen={analyticsSheetOpen}
+        onClose={() => setAnalyticsSheetOpen(false)}
+        tasks={tasks}
+        pomodoroHistory={pomodoroHistory}
+      />
       <DonationButton />
       <Toaster />
     </div>

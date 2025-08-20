@@ -1,17 +1,17 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Clock, HelpCircle, BarChartHorizontal } from 'lucide-react';
-import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   openHowToUse: () => void;
+  openAnalytics: () => void;
   toggleLongPomodoro: () => void;
   isLongPomodoro: boolean;
   isFullscreen?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  openHowToUse, 
+  openHowToUse,
+  openAnalytics,
   toggleLongPomodoro, 
   isLongPomodoro,
   isFullscreen = false 
@@ -34,15 +34,13 @@ const Header: React.FC<HeaderProps> = ({
           {isLongPomodoro ? '50 min' : '25 min'}
         </button>
         
-        <ThemeToggle />
-
-        <Link
-          to="/analytics"
+        <button
+          onClick={openAnalytics}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
           aria-label="View analytics"
         >
           <BarChartHorizontal className="w-5 h-5 text-white/80" />
-        </Link>
+        </button>
         
         <button
           onClick={openHowToUse}
