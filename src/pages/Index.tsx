@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Timer from '@/components/Timer';
@@ -10,35 +10,70 @@ import MusicPlayer from '@/components/MusicPlayer';
 import BackgroundCustomizer from '@/components/BackgroundCustomizer';
 import DonationButton from '@/components/DonationButton';
 import BackgroundRenderer from '@/components/BackgroundRenderer';
-import { useTimerContext } from '@/contexts/TimerProvider';
+import useTimer from '@/hooks/useTimer';
+import useTasks from '@/hooks/useTasks';
+import usePomodoroHistory from '@/hooks/usePomodoroHistory';
+import AnalyticsSheet from '@/components/AnalyticsSheet';
+import { useTheme } from '@/hooks/useTheme';
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
+  const [analyticsSheetOpen, setAnalyticsSheetOpen] = useState(false);
+  const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
+    try {
+      return localStorage.getItem('isLongPomodoro') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [howToUseOpen, setHowToUseOpen] = useState(false);
+  const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
+  const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const { theme, setTheme } = useTheme();
+
   const {
-    timerState,
-    formatTime,
-    isLongPomodoro,
-    toggleLongPomodoro,
     tasks,
     activeTaskId,
     addTask,
-    toggleTaskCompletion,
-    setActiveTask,
+    updateTask,
     deleteTask,
-    clearCompletedTasks,
-    howToUseOpen,
-    setHowToUseOpen,
-    musicPlayerOpen,
-    setMusicPlayerOpen,
-    backgroundCustomizerOpen,
-    setBackgroundCustomizerOpen,
-    isFullscreen,
-    setIsFullscreen,
+    toggleTaskCompletion,
+    incrementTaskPomodoros,
+    setActiveTask,
+    clearCompletedTasks
+  } = useTasks();
+
+  const { history: pomodoroHistory, addPomodoroSession } = usePomodoroHistory();
+
+  function handlePomodoroComplete(duration: number) {
+    if (activeTaskId) {
+      incrementTaskPomodoros(activeTaskId);
+    }
+    addPomodoroSession({ duration, taskId: activeTaskId || undefined });
+  }
+
+  const {
+    timerState,
+    timerDurations,
     switchMode,
     startTimer,
     pauseTimer,
     resetTimer,
-  } = useTimerContext();
+    formatTime
+  } = useTimer(isLongPomodoro, handlePomodoroComplete);
+
+
+  // Set dark mode by default
+  useEffect(() => {
+    setTheme('dark');
+  }, [setTheme]);
+
+  // Save long pomodoro preference
+  useEffect(() => {
+    localStorage.setItem('isLongPomodoro', isLongPomodoro.toString());
+  }, [isLongPomodoro]);
 
   // Update document title with timer
   useEffect(() => {
@@ -85,7 +120,11 @@ const Index = () => {
     return () => {
       document.removeEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
     };
-  }, [setIsFullscreen]);
+  }, []);
+
+  const toggleLongPomodoro = () => {
+    setIsLongPomodoro(!isLongPomodoro);
+  };
   
   const containerVariants = {
     hidden: {
@@ -124,6 +163,7 @@ const Index = () => {
       <div className="max-w-md mx-auto px-4 py-6 min-h-screen flex flex-col relative z-10 app-content">
         <Header 
           openHowToUse={() => setHowToUseOpen(true)} 
+          openAnalytics={() => setAnalyticsSheetOpen(true)}
           toggleLongPomodoro={toggleLongPomodoro} 
           isLongPomodoro={isLongPomodoro}
           isFullscreen={isFullscreen}
@@ -197,6 +237,12 @@ const Index = () => {
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
+      <AnalyticsSheet
+        isOpen={analyticsSheetOpen}
+        onClose={() => setAnalyticsSheetOpen(false)}
+        tasks={tasks}
+        pomodoroHistory={pomodoroHistory}
+      />
       <DonationButton />
       <Toaster />
     </div>
