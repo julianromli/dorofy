@@ -2,14 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import usePomodoroHistory from '@/hooks/usePomodoroHistory';
-import useTasks from '@/hooks/useTasks';
 import DailyPomodoroChart from '@/components/analytics/DailyPomodoroChart';
 import CompletedTasksLog from '@/components/analytics/CompletedTasksLog';
+import { useTimerContext } from '@/contexts/TimerProvider';
 
 const Analytics = () => {
-  const { history: pomodoroHistory } = usePomodoroHistory();
-  const { tasks } = useTasks();
+  const { pomodoroHistory, tasks } = useTimerContext();
 
   const completedTasks = tasks.filter(task => task.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Timer from '@/components/Timer';
@@ -10,67 +10,35 @@ import MusicPlayer from '@/components/MusicPlayer';
 import BackgroundCustomizer from '@/components/BackgroundCustomizer';
 import DonationButton from '@/components/DonationButton';
 import BackgroundRenderer from '@/components/BackgroundRenderer';
-import useTimer from '@/hooks/useTimer';
-import useTasks from '@/hooks/useTasks';
-import usePomodoroHistory from '@/hooks/usePomodoroHistory';
-import { useTheme } from '@/hooks/useTheme';
-import { Heart } from 'lucide-react';
+import { useTimerContext } from '@/contexts/TimerProvider';
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
-  const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
-    try {
-      return localStorage.getItem('isLongPomodoro') === 'true';
-    } catch {
-      return false;
-    }
-  });
-  const [howToUseOpen, setHowToUseOpen] = useState(false);
-  const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
-  const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  
-  const { theme, setTheme } = useTheme();
-
   const {
+    timerState,
+    formatTime,
+    isLongPomodoro,
+    toggleLongPomodoro,
     tasks,
     activeTaskId,
     addTask,
-    updateTask,
-    deleteTask,
     toggleTaskCompletion,
-    incrementTaskPomodoros,
     setActiveTask,
-    clearCompletedTasks
-  } = useTasks();
-  const { addPomodoroSession } = usePomodoroHistory();
-
-  function handlePomodoroComplete(duration: number) {
-    if (activeTaskId) {
-      incrementTaskPomodoros(activeTaskId);
-    }
-    addPomodoroSession({ duration, taskId: activeTaskId || undefined });
-  }
-
-  const {
-    timerState,
-    timerDurations,
+    deleteTask,
+    clearCompletedTasks,
+    howToUseOpen,
+    setHowToUseOpen,
+    musicPlayerOpen,
+    setMusicPlayerOpen,
+    backgroundCustomizerOpen,
+    setBackgroundCustomizerOpen,
+    isFullscreen,
+    setIsFullscreen,
     switchMode,
     startTimer,
     pauseTimer,
     resetTimer,
-    formatTime
-  } = useTimer(isLongPomodoro, handlePomodoroComplete);
-
-  // Set dark mode by default
-  useEffect(() => {
-    setTheme('dark');
-  }, [setTheme]);
-
-  // Save long pomodoro preference
-  useEffect(() => {
-    localStorage.setItem('isLongPomodoro', isLongPomodoro.toString());
-  }, [isLongPomodoro]);
+  } = useTimerContext();
 
   // Update document title with timer
   useEffect(() => {
@@ -117,11 +85,7 @@ const Index = () => {
     return () => {
       document.removeEventListener('dorofyFullscreenChanged', handleFullscreenChange as EventListener);
     };
-  }, []);
-  
-  const toggleLongPomodoro = () => {
-    setIsLongPomodoro(!isLongPomodoro);
-  };
+  }, [setIsFullscreen]);
   
   const containerVariants = {
     hidden: {
