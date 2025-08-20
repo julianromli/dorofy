@@ -12,6 +12,7 @@ import DonationButton from '@/components/DonationButton';
 import BackgroundRenderer from '@/components/BackgroundRenderer';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
+import usePomodoroHistory from '@/hooks/usePomodoroHistory';
 import { useTheme } from '@/hooks/useTheme';
 import { Heart } from 'lucide-react';
 import { Toaster } from '@/components/ui/toaster';
@@ -30,17 +31,7 @@ const Index = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   
   const { theme, setTheme } = useTheme();
-  
-  const {
-    timerState,
-    timerDurations,
-    switchMode,
-    startTimer,
-    pauseTimer,
-    resetTimer,
-    formatTime
-  } = useTimer(isLongPomodoro);
-  
+
   const {
     tasks,
     activeTaskId,
@@ -52,6 +43,24 @@ const Index = () => {
     setActiveTask,
     clearCompletedTasks
   } = useTasks();
+  const { addPomodoroSession } = usePomodoroHistory();
+
+  function handlePomodoroComplete(duration: number) {
+    if (activeTaskId) {
+      incrementTaskPomodoros(activeTaskId);
+    }
+    addPomodoroSession({ duration, taskId: activeTaskId || undefined });
+  }
+
+  const {
+    timerState,
+    timerDurations,
+    switchMode,
+    startTimer,
+    pauseTimer,
+    resetTimer,
+    formatTime
+  } = useTimer(isLongPomodoro, handlePomodoroComplete);
 
   // Set dark mode by default
   useEffect(() => {

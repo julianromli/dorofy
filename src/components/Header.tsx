@@ -1,5 +1,6 @@
 import React from 'react';
-import { Clock, HelpCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Clock, HelpCircle, BarChartHorizontal } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
@@ -34,6 +35,14 @@ const Header: React.FC<HeaderProps> = ({
         </button>
         
         <ThemeToggle />
+
+        <Link
+          to="/analytics"
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          aria-label="View analytics"
+        >
+          <BarChartHorizontal className="w-5 h-5 text-white/80" />
+        </Link>
         
         <button
           onClick={openHowToUse}

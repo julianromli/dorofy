@@ -25,7 +25,10 @@ const getTimerDurations = (isLongPomodoro: boolean): TimerDurations => {
   };
 };
 
-const useTimer = (isLongPomodoro: boolean = false) => {
+const useTimer = (
+  isLongPomodoro: boolean = false,
+  onPomodoroComplete: (duration: number) => void = () => {}
+) => {
   // Get appropriate timer durations based on the pomodoro preference
   const [timerDurations, setTimerDurations] = useState<TimerDurations>(getTimerDurations(isLongPomodoro));
   
@@ -190,6 +193,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
             
             // Switch to the next mode
             if (prev.mode === 'pomodoro') {
+              onPomodoroComplete(timerDurations.pomodoro);
               completedPomos += 1;
               
               // After 4 pomodoros, take a long break
@@ -250,7 +254,7 @@ const useTimer = (isLongPomodoro: boolean = false) => {
         intervalRef.current = null;
       }
     };
-  }, [timerState.isRunning, timerDurations]);
+  }, [timerState.isRunning, timerDurations, onPomodoroComplete]);
 
   // Switch timer mode
   const switchMode = (mode: TimerMode) => {

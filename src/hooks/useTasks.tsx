@@ -9,6 +9,7 @@ export type Task = {
   estimatedPomodoros: number;
   completedPomodoros: number;
   createdAt: number;
+  completedAt?: number;
 };
 
 const useTasks = () => {
@@ -104,10 +105,18 @@ const useTasks = () => {
 
   // Toggle task completion
   const toggleTaskCompletion = (id: string) => {
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
+    setTasks(prev =>
+      prev.map(task => {
+        if (task.id === id) {
+          const isCompleted = !task.completed;
+          return {
+            ...task,
+            completed: isCompleted,
+            completedAt: isCompleted ? Date.now() : undefined,
+          };
+        }
+        return task;
+      })
     );
   };
 
@@ -115,17 +124,29 @@ const useTasks = () => {
   const incrementTaskPomodoros = (id: string | null = activeTaskId) => {
     if (!id) return;
     
-    setTasks(prev => 
-      prev.map(task => 
-        task.id === id ? 
-          { 
-            ...task, 
-            completedPomodoros: task.completedPomodoros + 1,
-            // Auto-complete task if we've reached the estimated pomodoros
-            completed: task.completedPomodoros + 1 >= task.estimatedPomodoros ? true : task.completed
-          } : 
-          task
-      )
+    setTasks(prev =>
+      prev.map(task => {
+        if (task.id === id) {
+          const newCompletedPomodoros = task.completedPomodoros + 1;
+          const isCompleted = newCompletedPomodoros >= task.estimatedPomodoros;
+
+          if (isCompleted && !task.completed) {
+            // Task is being auto-completed
+            return {
+              ...task,
+              completedPomodoros: newCompletedPomodoros,
+              completed: true,
+              completedAt: Date.now(),
+            };
+          }
+
+          return {
+            ...task,
+            completedPomodoros: newCompletedPomodoros,
+          };
+        }
+        return task;
+      })
     );
   };
 
