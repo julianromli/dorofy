@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { dorofyDB } from '@/lib/indexeddb';
 
 export type PomodoroSession = {
   id: string;
@@ -8,37 +9,44 @@ export type PomodoroSession = {
 };
 
 const usePomodoroHistory = () => {
-  const loadHistory = (): PomodoroSession[] => {
-    try {
-      const savedHistory = localStorage.getItem('pomodoroHistory');
-      return savedHistory ? JSON.parse(savedHistory) : [];
-    } catch (error) {
-      console.error('Error loading pomodoro history:', error);
-      return [];
-    }
-  };
+  const [history, setHistory] = useState<PomodoroSession[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [history, setHistory] = useState<PomodoroSession[]>(loadHistory);
-
+  // Load history from IndexedDB
   useEffect(() => {
-    try {
-      localStorage.setItem('pomodoroHistory', JSON.stringify(history));
-    } catch (error) {
-      console.error('Error saving pomodoro history:', error);
-    }
-  }, [history]);
+    const loadHistory = async () => {
+      try {
+        await dorofyDB.init();
+        const loadedHistory = await dorofyDB.getPomodoroHistory();
+        setHistory(loadedHistory);
+      } catch (error) {
+        console.error('Error loading pomodoro history:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const addPomodoroSession = (session: Omit<PomodoroSession, 'id' | 'completedAt'>) => {
+    loadHistory();
+  }, []);
+
+  const addPomodoroSession = async (session: Omit<PomodoroSession, 'id' | 'completedAt'>) => {
     const newSession: PomodoroSession = {
       ...session,
       id: Date.now().toString(),
       completedAt: Date.now(),
     };
-    setHistory(prev => [newSession, ...prev]);
+    
+    try {
+      await dorofyDB.addPomodoroSession(newSession);
+      setHistory(prev => [newSession, ...prev]);
+    } catch (error) {
+      console.error('Error saving pomodoro session:', error);
+    }
   };
 
   return {
     history,
+    isLoading,
     addPomodoroSession,
   };
 };

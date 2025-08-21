@@ -2,6 +2,7 @@ import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import DailyPomodoroChart from '@/components/analytics/DailyPomodoroChart';
 import CompletedTasksLog from '@/components/analytics/CompletedTasksLog';
+import BackupSystem from '@/components/BackupSystem';
 import { Task } from '@/hooks/useTasks';
 import { PomodoroSession } from '@/hooks/usePomodoroHistory';
 
@@ -17,7 +18,7 @@ const AnalyticsSheet: React.FC<AnalyticsSheetProps> = ({ isOpen, onClose, tasks,
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full md:w-3/4 lg:w-1/2 p-0">
+      <SheetContent className="w-full md:w-4/5 lg:w-3/5 xl:w-2/3 p-0">
         <div className="h-full flex flex-col">
           <SheetHeader className="p-6">
             <SheetTitle>Productivity Analytics</SheetTitle>
@@ -38,6 +39,7 @@ const AnalyticsSheet: React.FC<AnalyticsSheetProps> = ({ isOpen, onClose, tasks,
                 <CompletedTasksLog tasks={completedTasks} />
               </div>
             </div>
+            <BackupSystem onDataImported={() => window.location.reload()} />
           </div>
         </div>
       </SheetContent>

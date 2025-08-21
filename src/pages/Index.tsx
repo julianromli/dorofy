@@ -10,6 +10,7 @@ import MusicPlayer from '@/components/MusicPlayer';
 import BackgroundCustomizer from '@/components/BackgroundCustomizer';
 import DonationButton from '@/components/DonationButton';
 import BackgroundRenderer from '@/components/BackgroundRenderer';
+import BackupSystem from '@/components/BackupSystem';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
@@ -28,6 +29,7 @@ const Index = () => {
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
+  const [backupSystemOpen, setBackupSystemOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
@@ -39,7 +41,8 @@ const Index = () => {
     toggleTaskCompletion,
     incrementTaskPomodoros,
     setActiveTask,
-    clearCompletedTasks
+    clearCompletedTasks,
+    reorderTasks
   } = useTasks();
 
   const { history: pomodoroHistory, addPomodoroSession } = usePomodoroHistory();
@@ -209,7 +212,8 @@ const Index = () => {
                   onToggleComplete={toggleTaskCompletion} 
                   onSetActive={setActiveTask} 
                   onDelete={deleteTask} 
-                  onClearCompleted={clearCompletedTasks} 
+                  onClearCompleted={clearCompletedTasks}
+                  onReorderTasks={reorderTasks}
                 />
                 <AddTask onAddTask={addTask} />
               </motion.div>

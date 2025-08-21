@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { dorofyDB, migrateFromLocalStorage, isMigrationComplete } from '@/lib/indexeddb';
 
 export type Task = {
   id: string;
@@ -13,50 +14,60 @@ export type Task = {
 };
 
 const useTasks = () => {
-  // Load tasks from localStorage
-  const loadTasks = (): Task[] => {
-    try {
-      const savedTasks = localStorage.getItem('tasks');
-      if (savedTasks) {
-        return JSON.parse(savedTasks);
-      }
-    } catch (error) {
-      console.error('Error loading tasks:', error);
-    }
-    return [];
-  };
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [tasks, setTasks] = useState<Task[]>(loadTasks);
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem('activeTaskId');
-    } catch (error) {
-      console.error('Error loading active task ID:', error);
-      return null;
-    }
-  });
-
-  // Save tasks to localStorage whenever they change
+  // Initialize data from IndexedDB
   useEffect(() => {
-    try {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    } catch (error) {
-      console.error('Error saving tasks:', error);
-    }
-  }, [tasks]);
+    const initializeData = async () => {
+      try {
+        // Check if migration is needed
+        const migrationDone = await isMigrationComplete();
+        if (!migrationDone) {
+          const migrated = await migrateFromLocalStorage();
+          if (migrated) {
+            toast.success('Data migrated to enhanced storage');
+          }
+        }
 
-  // Save active task ID to localStorage
-  useEffect(() => {
-    try {
-      if (activeTaskId) {
-        localStorage.setItem('activeTaskId', activeTaskId);
-      } else {
-        localStorage.removeItem('activeTaskId');
+        // Load data from IndexedDB
+        await dorofyDB.init();
+        const [loadedTasks, loadedActiveTaskId] = await Promise.all([
+          dorofyDB.getTasks(),
+          dorofyDB.getSetting('activeTaskId')
+        ]);
+
+        setTasks(loadedTasks);
+        setActiveTaskId(loadedActiveTaskId || null);
+      } catch (error) {
+        console.error('Error initializing tasks:', error);
+        toast.error('Failed to load tasks data');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error saving active task ID:', error);
+    };
+
+    initializeData();
+  }, []);
+
+  // Save tasks to IndexedDB whenever they change
+  useEffect(() => {
+    if (!isLoading && tasks.length >= 0) {
+      dorofyDB.setTasks(tasks).catch(error => {
+        console.error('Error saving tasks:', error);
+      });
     }
-  }, [activeTaskId]);
+  }, [tasks, isLoading]);
+
+  // Save active task ID to IndexedDB
+  useEffect(() => {
+    if (!isLoading) {
+      dorofyDB.setSetting('activeTaskId', activeTaskId).catch(error => {
+        console.error('Error saving active task ID:', error);
+      });
+    }
+  }, [activeTaskId, isLoading]);
 
   // Add a new task
   const addTask = (title: string, estimatedPomodoros: number = 1) => {
@@ -181,9 +192,15 @@ const useTasks = () => {
     toast.success(`Cleared ${completedCount} completed ${completedCount === 1 ? 'task' : 'tasks'}`);
   };
 
+  // Reorder tasks
+  const reorderTasks = (newTasks: Task[]) => {
+    setTasks(newTasks);
+  };
+
   return {
     tasks,
     activeTaskId,
+    isLoading,
     addTask,
     updateTask,
     deleteTask,
@@ -192,6 +209,7 @@ const useTasks = () => {
     setActiveTask,
     getActiveTask,
     clearCompletedTasks,
+    reorderTasks,
   };
 };
 
