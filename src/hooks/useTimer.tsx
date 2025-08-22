@@ -90,29 +90,53 @@ const useTimer = (
 
   // Set up audio for timer completion
   useEffect(() => {
+    // Skip audio setup in environments without media support (e.g. SSR, jsdom)
+    if (
+      typeof Audio === 'undefined' ||
+      typeof window === 'undefined' ||
+      (typeof navigator !== 'undefined' && navigator.userAgent?.includes('jsdom'))
+    ) {
+      return;
+    }
+
     // Create audio element
     audioRef.current = new Audio('/alarmbell.wav');
-    
+
     // Fix for iOS and Safari that require user interaction
-    document.addEventListener('click', () => {
-      if (audioRef.current) {
-        // Load audio on user interaction
-        audioRef.current.load();
-        // Set volume to 0 and play silently to "prime" the audio system
-        audioRef.current.volume = 0;
-        audioRef.current.play().catch(() => {
-          // Ignore errors here, we're just priming
-        });
-        // Reset volume after priming
-        setTimeout(() => {
-          if (audioRef.current) audioRef.current.volume = 1;
-        }, 100);
-      }
-    }, { once: true });
-    
+    document.addEventListener(
+      'click',
+      () => {
+        if (audioRef.current) {
+          // Load audio on user interaction
+          audioRef.current.load();
+          // Set volume to 0 and play silently to "prime" the audio system
+          audioRef.current.volume = 0;
+          try {
+            const primePromise = audioRef.current.play();
+            if (primePromise?.catch) {
+              primePromise.catch(() => {
+                // Ignore errors here, we're just priming
+              });
+            }
+          } catch {
+            // Ignore if play isn't supported (e.g. in tests or server)
+          }
+          // Reset volume after priming
+          setTimeout(() => {
+            if (audioRef.current) audioRef.current.volume = 1;
+          }, 100);
+        }
+      },
+      { once: true }
+    );
+
     return () => {
       if (audioRef.current) {
-        audioRef.current.pause();
+        try {
+          audioRef.current.pause();
+        } catch {
+          // Ignore if pause isn't supported
+        }
         audioRef.current = null;
       }
     };
@@ -148,29 +172,37 @@ const useTimer = (
       audioRef.current.volume = 1;
       
       // Play the sound
-      const playPromise = audioRef.current.play();
-      
-      // Handle play promise to avoid uncaught promise errors
-      if (playPromise !== undefined) {
-        playPromise.catch(e => {
-          console.error('Error playing sound:', e);
-          
-          // Try to play again with user interaction
-          const handleUserInteraction = () => {
-            if (audioRef.current) {
-              audioRef.current.play().catch(err => 
-                console.error('Still cannot play audio:', err)
-              );
-            }
-            
-            // Remove the event listeners after trying once
-            document.removeEventListener('click', handleUserInteraction);
-            document.removeEventListener('touchstart', handleUserInteraction);
-          };
-          
-          document.addEventListener('click', handleUserInteraction, { once: true });
-          document.addEventListener('touchstart', handleUserInteraction, { once: true });
-        });
+      try {
+        const playPromise = audioRef.current.play();
+
+        // Handle play promise to avoid uncaught promise errors
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            console.error('Error playing sound:', e);
+
+            // Try to play again with user interaction
+            const handleUserInteraction = () => {
+              if (audioRef.current) {
+                try {
+                  audioRef.current.play().catch(err =>
+                    console.error('Still cannot play audio:', err)
+                  );
+                } catch (err) {
+                  console.error('Still cannot play audio:', err);
+                }
+              }
+
+              // Remove the event listeners after trying once
+              document.removeEventListener('click', handleUserInteraction);
+              document.removeEventListener('touchstart', handleUserInteraction);
+            };
+
+            document.addEventListener('click', handleUserInteraction, { once: true });
+            document.addEventListener('touchstart', handleUserInteraction, { once: true });
+          });
+        }
+      } catch (e) {
+        console.error('Error playing sound:', e);
       }
     }
   };
