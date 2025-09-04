@@ -132,46 +132,52 @@ const BackupSystem: React.FC<BackupSystemProps> = ({ onDataImported }) => {
           </AlertDescription>
         </Alert>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button 
-            onClick={handleExport}
-            disabled={isExporting}
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            {isExporting ? 'Exporting...' : 'Export Data'}
-          </Button>
-
-          <div className="relative">
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImport}
-              disabled={isImporting}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              id="backup-import"
-            />
+        <div className="flex flex-col gap-3">
+          {/* Row 1: Export + Import */}
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3">
             <Button 
-              variant="outline"
-              disabled={isImporting}
-              className="flex items-center gap-2 w-full"
-              asChild
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-2 w-full sm:flex-1 min-w-[200px]"
             >
-              <label htmlFor="backup-import" className="cursor-pointer">
-                <Upload className="w-4 h-4" />
-                {isImporting ? 'Importing...' : 'Import Data'}
-              </label>
+              <Download className="w-4 h-4" />
+              {isExporting ? 'Exporting...' : 'Export Data'}
             </Button>
+
+            <div className="relative w-full sm:flex-1 min-w-[200px]">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImport}
+                disabled={isImporting}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="backup-import"
+              />
+              <Button 
+                variant="outline"
+                disabled={isImporting}
+                className="flex items-center gap-2 w-full"
+                asChild
+              >
+                <label htmlFor="backup-import" className="cursor-pointer">
+                  <Upload className="w-4 h-4" />
+                  {isImporting ? 'Importing...' : 'Import Data'}
+                </label>
+              </Button>
+            </div>
           </div>
 
-          <Button 
-            variant="destructive"
-            onClick={handleClearData}
-            className="flex items-center gap-2"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Clear All Data
-          </Button>
+          {/* Row 2: Clear button full width */}
+          <div>
+            <Button 
+              variant="destructive"
+              onClick={handleClearData}
+              className="flex items-center gap-2 w-full"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Clear All Data
+            </Button>
+          </div>
         </div>
 
         <div className="text-sm text-muted-foreground space-y-1">
