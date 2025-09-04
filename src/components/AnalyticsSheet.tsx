@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import DailyPomodoroChart from '@/components/analytics/DailyPomodoroChart';
+const DailyPomodoroChart = React.lazy(() => import('@/components/analytics/DailyPomodoroChart'));
 import CompletedTasksLog from '@/components/analytics/CompletedTasksLog';
 import BackupSystem from '@/components/BackupSystem';
 import { Task } from '@/hooks/useTasks';
@@ -27,13 +27,15 @@ const AnalyticsSheet: React.FC<AnalyticsSheetProps> = ({ isOpen, onClose, tasks,
             </SheetDescription>
           </SheetHeader>
           <div className="flex-grow overflow-y-auto p-6 space-y-8">
-            <div className="p-6 bg-card rounded-lg border h-[400px] flex flex-col">
+            <div className="p-6 bg-card rounded-lg border min-h-[300px] md:h-[380px] flex flex-col">
               <h2 className="text-xl font-semibold mb-4">Focus Sessions (Last 7 Days)</h2>
               <div className="flex-grow">
-                <DailyPomodoroChart sessions={pomodoroHistory} />
+                <React.Suspense>
+                  <DailyPomodoroChart sessions={pomodoroHistory} />
+                </React.Suspense>
               </div>
             </div>
-            <div className="p-6 bg-card rounded-lg border h-[400px] flex flex-col">
+            <div className="p-6 bg-card rounded-lg border min-h-[300px] md:h-[380px] flex flex-col">
               <h2 className="text-xl font-semibold mb-4">Completed Tasks Log</h2>
               <div className="flex-grow">
                 <CompletedTasksLog tasks={completedTasks} />

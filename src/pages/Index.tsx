@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Timer from '@/components/Timer';
@@ -14,7 +14,7 @@ import BackupSystem from '@/components/BackupSystem';
 import useTimer from '@/hooks/useTimer';
 import useTasks from '@/hooks/useTasks';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
-import AnalyticsSheet from '@/components/AnalyticsSheet';
+const AnalyticsSheet = React.lazy(() => import('@/components/AnalyticsSheet'));
 import { Toaster } from '@/components/ui/toaster';
 
 const Index = () => {
@@ -233,12 +233,14 @@ const Index = () => {
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
-      <AnalyticsSheet
-        isOpen={analyticsSheetOpen}
-        onClose={() => setAnalyticsSheetOpen(false)}
-        tasks={tasks}
-        pomodoroHistory={pomodoroHistory}
-      />
+      <Suspense>
+        <AnalyticsSheet
+          isOpen={analyticsSheetOpen}
+          onClose={() => setAnalyticsSheetOpen(false)}
+          tasks={tasks}
+          pomodoroHistory={pomodoroHistory}
+        />
+      </Suspense>
       <DonationButton />
       <Toaster />
     </div>
