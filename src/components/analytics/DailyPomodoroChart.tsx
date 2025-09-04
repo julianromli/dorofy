@@ -5,20 +5,26 @@ import { subDays, format, startOfDay } from 'date-fns';
 
 interface DailyPomodoroChartProps {
   sessions: PomodoroSession[];
+  rangeDays?: number; // default 7
+  metric?: 'sessions' | 'minutes';
 }
 
-const DailyPomodoroChart: React.FC<DailyPomodoroChartProps> = ({ sessions }) => {
+const DailyPomodoroChart: React.FC<DailyPomodoroChartProps> = ({ sessions, rangeDays = 7, metric = 'sessions' }) => {
   const processData = () => {
-    const last7Days = Array.from({ length: 7 }, (_, i) => startOfDay(subDays(new Date(), i))).reverse();
+    const lastNDays = Array.from({ length: rangeDays }, (_, i) => startOfDay(subDays(new Date(), i))).reverse();
 
-    const data = last7Days.map(day => {
+    const data = lastNDays.map(day => {
       const dayStr = format(day, 'MMM d');
-      const count = sessions.filter(session => {
+      const daySessions = sessions.filter(session => {
         const sessionDay = startOfDay(new Date(session.completedAt));
         return sessionDay.getTime() === day.getTime();
-      }).length;
+      });
 
-      return { name: dayStr, 'Focus Sessions': count };
+      const value = metric === 'sessions'
+        ? daySessions.length
+        : Math.round(daySessions.reduce((acc, s) => acc + s.duration, 0) / 60); // minutes
+
+      return { name: dayStr, value };
     });
 
     return data;
@@ -48,7 +54,7 @@ const DailyPomodoroChart: React.FC<DailyPomodoroChartProps> = ({ sessions }) => 
           }}
         />
         <Legend />
-        <Bar dataKey="Focus Sessions" fill="#8884d8" />
+        <Bar name={metric === 'sessions' ? 'Focus Sessions' : 'Focus Minutes'} dataKey="value" fill="#8884d8" />
       </BarChart>
     </ResponsiveContainer>
   );

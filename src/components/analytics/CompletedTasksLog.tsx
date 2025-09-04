@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 interface CompletedTasksLogProps {
   tasks: Task[];
+  forcedRangeDays?: number; // if provided, use global range and hide local controls
 }
 
 type RangeType = '7d' | '30d' | 'month';
@@ -28,13 +29,17 @@ const getMonthOptions = (tasks: Task[]) => {
   return months;
 };
 
-const CompletedTasksLog: React.FC<CompletedTasksLogProps> = ({ tasks }) => {
+const CompletedTasksLog: React.FC<CompletedTasksLogProps> = ({ tasks, forcedRangeDays }) => {
   const [range, setRange] = React.useState<RangeType>('7d');
   const monthOptions = React.useMemo(() => getMonthOptions(tasks), [tasks]);
   const [selectedMonth, setSelectedMonth] = React.useState<string>(monthOptions[0] ?? format(new Date(), 'yyyy-MM'));
 
   const filtered = React.useMemo(() => {
     const now = new Date();
+    if (forcedRangeDays) {
+      const after = subDays(now, forcedRangeDays);
+      return tasks.filter(t => !!t.completedAt && isAfter(new Date(t.completedAt!), after));
+    }
     if (range === '7d') {
       const after = subDays(now, 7);
       return tasks.filter(t => !!t.completedAt && isAfter(new Date(t.completedAt!), after));
@@ -52,40 +57,44 @@ const CompletedTasksLog: React.FC<CompletedTasksLogProps> = ({ tasks }) => {
       const d = new Date(t.completedAt);
       return isAfter(d, start) && isBefore(d, end);
     });
-  }, [range, selectedMonth, tasks]);
+  }, [range, selectedMonth, tasks, forcedRangeDays]);
 
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex items-center gap-2 flex-wrap">
-        <Select value={range} onValueChange={v => setRange(v as RangeType)}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Range" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7d">Last 7 days</SelectItem>
-            <SelectItem value="30d">Last 30 days</SelectItem>
-            <SelectItem value="month">Specific month</SelectItem>
-          </SelectContent>
-        </Select>
+        {!forcedRangeDays && (
+          <>
+            <Select value={range} onValueChange={v => setRange(v as RangeType)}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Range" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7d">Last 7 days</SelectItem>
+                <SelectItem value="30d">Last 30 days</SelectItem>
+                <SelectItem value="month">Specific month</SelectItem>
+              </SelectContent>
+            </Select>
 
-        {range === 'month' && (
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {monthOptions.map(m => (
-                <SelectItem key={m} value={m}>
-                  {format(new Date(Number(m.split('-')[0]), Number(m.split('-')[1]) - 1, 1), 'MMMM yyyy')}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {range === 'month' && (
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {monthOptions.map(m => (
+                    <SelectItem key={m} value={m}>
+                      {format(new Date(Number(m.split('-')[0]), Number(m.split('-')[1]) - 1, 1), 'MMMM yyyy')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </>
         )}
 
         <div className="ml-auto flex items-center gap-1 text-xs text-muted-foreground">
           <span>
-            Showing: {range === '7d' ? 'Last 7 days' : range === '30d' ? 'Last 30 days' : format(new Date(Number(selectedMonth.split('-')[0]), Number(selectedMonth.split('-')[1]) - 1, 1), 'MMMM yyyy')}
+            Showing: {forcedRangeDays ? `Last ${forcedRangeDays} days` : (range === '7d' ? 'Last 7 days' : range === '30d' ? 'Last 30 days' : format(new Date(Number(selectedMonth.split('-')[0]), Number(selectedMonth.split('-')[1]) - 1, 1), 'MMMM yyyy'))}
           </span>
           <TooltipProvider>
             <Tooltip>
