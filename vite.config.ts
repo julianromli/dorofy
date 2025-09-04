@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+﻿import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico','favicon3.ico','og-image.png','assets/screenshot.png','alarmbell.wav'],
+      devOptions: { enabled: true },
+      includeAssets: ['favicon.ico','favicon3.ico','og-image.png','assets/screenshot.png','alarmbell.wav','icons/icon-192.png','icons/icon-512.png'],
       manifest: {
         name: 'Dorofy',
         short_name: 'Dorofy',
@@ -23,8 +24,9 @@ export default defineConfig(({ mode }) => ({
         background_color: '#0b0612',
         theme_color: '#6b46c1',
         icons: [
-          { src: 'og-image.png', sizes: '1200x630', type: 'image/png' },
-          { src: 'favicon3.ico', sizes: '256x256 128x128 64x64 32x32 16x16', type: 'image/x-icon' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          { src: 'favicon3.ico', sizes: '256x256 128x128 64x64 32x32 16x16', type: 'image/x-icon' }
         ],
       },
       workbox: {
@@ -47,3 +49,4 @@ export default defineConfig(({ mode }) => ({
     },
   },
 }));
+
