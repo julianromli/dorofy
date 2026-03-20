@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
 import { Coffee, Focus, Orbit, Waves } from 'lucide-react';
 
 import { GlassButton, LiquidGlassSurface } from '@/components/glass';
+import { cn } from '@/lib/utils';
 import { TimerMode } from '@/hooks/useTimer';
 
 interface TimerControlsProps {
@@ -48,17 +50,30 @@ const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }
             const isActive = mode === currentMode;
 
             return (
-              <GlassButton
-                key={mode}
-                onClick={() => switchMode(mode)}
-                variant={isActive ? 'active' : 'ghost'}
-                size="sm"
-                icon={Icon}
-                className={isActive ? 'glass-mode-accent text-white shadow-(--glow-primary)' : 'text-muted-foreground'}
-                aria-label={`${modeConfig[mode].label} mode`}
-              >
-                {modeConfig[mode].label}
-              </GlassButton>
+              <div key={mode} className="relative z-0">
+                {isActive && (
+                  <motion.div
+                    layoutId="timer-mode-highlight"
+                    className="absolute inset-0 z-[-1] rounded-[1.25rem] border glass-mode-accent"
+                    style={{ boxShadow: 'var(--glow-primary), var(--glass-stroke)' }}
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <GlassButton
+                  onClick={() => switchMode(mode)}
+                  variant="ghost"
+                  size="sm"
+                  icon={Icon}
+                  className={cn(
+                    "relative z-10 transition-colors duration-300",
+                    isActive ? 'text-white' : 'text-muted-foreground'
+                  )}
+                  aria-label={`${modeConfig[mode].label} mode`}
+                >
+                  {modeConfig[mode].label}
+                </GlassButton>
+              </div>
             );
           })}
 
