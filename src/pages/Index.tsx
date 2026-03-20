@@ -11,7 +11,8 @@ import MusicPlayer from '@/components/MusicPlayer';
 import TaskList from '@/components/TaskList';
 import Timer from '@/components/Timer';
 import TimerControls from '@/components/TimerControls';
-import { GlassBadge, GlassCard, LiquidGlassSurface } from '@/components/glass';
+import { GlassBadge, LiquidGlassSurface } from '@/components/glass';
+import { ListTodo } from 'lucide-react';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
 import useTasks from '@/hooks/useTasks';
 import useTimer from '@/hooks/useTimer';
@@ -47,6 +48,7 @@ const Index = () => {
   const [howToUseOpen, setHowToUseOpen] = useState(false);
   const [musicPlayerOpen, setMusicPlayerOpen] = useState(false);
   const [backgroundCustomizerOpen, setBackgroundCustomizerOpen] = useState(false);
+  const [taskBoardOpen, setTaskBoardOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const {
@@ -138,15 +140,25 @@ const Index = () => {
             isFullscreen={isFullscreen}
           />
 
-          <main className="mt-6 flex-1">
+          <main className="mt-6 flex-1 flex flex-col items-center">
+            {!isFullscreen ? (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="w-full mb-6"
+              >
+                <TimerControls currentMode={timerState.mode} switchMode={switchMode} />
+              </motion.div>
+            ) : null}
+
             <motion.div
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className={`grid gap-6 ${isFullscreen ? '' : 'xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]'}`}
+              className={`w-full max-w-2xl mx-auto ${isFullscreen ? '' : ''}`}
             >
-              <motion.section variants={itemVariants} className="space-y-5">
-                {!isFullscreen ? <TimerControls currentMode={timerState.mode} switchMode={switchMode} /> : null}
+              <motion.section variants={itemVariants} className="space-y-6">
 
                 <Timer
                   timeString={formatTime(timerState.timeLeft)}
@@ -178,38 +190,6 @@ const Index = () => {
                   </motion.div>
                 ) : null}
               </motion.section>
-
-              {!isFullscreen ? (
-                <motion.aside variants={itemVariants} className="space-y-5">
-                  <GlassCard variant="elevated" className="space-y-5">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Task board</p>
-                        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Plan the next focus block</h2>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          Drag unfinished tasks to reorder them, then set one as active before starting.
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <GlassBadge variant="outline">{tasks.length} total</GlassBadge>
-                        <GlassBadge variant="success">{completedTasks} done</GlassBadge>
-                      </div>
-                    </div>
-
-                    <TaskList
-                      tasks={tasks}
-                      activeTaskId={activeTaskId}
-                      onToggleComplete={toggleTaskCompletion}
-                      onSetActive={setActiveTask}
-                      onDelete={deleteTask}
-                      onClearCompleted={clearCompletedTasks}
-                      onReorderTasks={reorderTasks}
-                    />
-
-                    <AddTask onAddTask={addTask} />
-                  </GlassCard>
-                </motion.aside>
-              ) : null}
             </motion.div>
           </main>
 
@@ -225,6 +205,53 @@ const Index = () => {
       <HowToUse isOpen={howToUseOpen} onClose={() => setHowToUseOpen(false)} />
       <MusicPlayer isOpen={musicPlayerOpen} setIsOpen={setMusicPlayerOpen} />
       <BackgroundCustomizer isOpen={backgroundCustomizerOpen} setIsOpen={setBackgroundCustomizerOpen} />
+      <div
+        className={`fixed top-4 left-4 bottom-4 z-40 flex w-[min(34rem,calc(100vw-2rem))] flex-col rounded-[2rem] glass-sidebar transition-all duration-300 ease-in-out ${
+          taskBoardOpen
+            ? 'visible translate-x-0 opacity-100 pointer-events-auto'
+            : 'invisible -translate-x-[110%] opacity-0 pointer-events-none'
+        } ${isFullscreen ? 'hidden' : ''}`}
+      >
+        <div className="flex flex-col gap-2 border-b border-white/10 px-6 py-5 text-left">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-foreground">Task board</h2>
+              <p className="text-sm text-muted-foreground">Plan the next focus block</p>
+            </div>
+            <button
+              onClick={() => setTaskBoardOpen(false)}
+              className="glass-floating-button flex h-10 w-10 items-center justify-center rounded-full"
+              aria-label="Close tasks"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <GlassBadge variant="outline">{tasks.length} total</GlassBadge>
+            <GlassBadge variant="success">{completedTasks} done</GlassBadge>
+          </div>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          <TaskList
+            tasks={tasks}
+            activeTaskId={activeTaskId}
+            onToggleComplete={toggleTaskCompletion}
+            onSetActive={setActiveTask}
+            onDelete={deleteTask}
+            onClearCompleted={clearCompletedTasks}
+            onReorderTasks={reorderTasks}
+          />
+          <AddTask onAddTask={addTask} />
+        </div>
+      </div>
+      <button
+        onClick={() => setTaskBoardOpen(!taskBoardOpen)}
+        className={`glass-floating-button fixed bottom-4 left-4 z-[100] flex h-12 w-12 translate-y-[-180px] items-center justify-center rounded-full ${isFullscreen ? 'hidden' : ''}`}
+        aria-label={taskBoardOpen ? "Close tasks" : "Open tasks"}
+      >
+        <ListTodo className={`h-5 w-5 ${taskBoardOpen ? 'text-primary' : 'text-foreground'}`} />
+      </button>
+
       <Suspense>
         {analyticsSheetOpen ? (
           <AnalyticsSheetLazy

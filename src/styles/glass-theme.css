@@ -228,7 +228,7 @@
       radial-gradient(circle at top left, rgba(255, 255, 255, 0.28), transparent 32%),
       radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.12), transparent 24%),
       linear-gradient(180deg, var(--glass-surface-strong), var(--card-bg));
-    box-shadow: var(--glass-shadow-strong), inset 0 1px 0 rgba(255,255,255,0.42);
+    box-shadow: var(--glass-shadow-strong), var(--glass-stroke);
   }
 
   .glass-panel-active {
@@ -251,7 +251,7 @@
     background: linear-gradient(180deg, color-mix(in srgb, var(--card-bg) 85%, transparent), color-mix(in srgb, var(--glass-surface-soft) 95%, transparent));
     backdrop-filter: blur(var(--glass-blur-lg)) saturate(1.4);
     -webkit-backdrop-filter: blur(var(--glass-blur-lg)) saturate(1.4);
-    box-shadow: var(--glass-shadow-strong), inset 0 1px 0 rgba(255,255,255,0.18);
+    box-shadow: var(--glass-shadow-strong), var(--glass-stroke);
   }
 
   .glass-floating-button {
@@ -259,7 +259,7 @@
     background: linear-gradient(180deg, var(--glass-surface-soft), color-mix(in srgb, var(--glass-surface-soft) 78%, transparent));
     backdrop-filter: blur(var(--glass-blur-md)) saturate(1.4);
     -webkit-backdrop-filter: blur(var(--glass-blur-md)) saturate(1.4);
-    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.24);
+    box-shadow: var(--glass-shadow), var(--glass-stroke);
   }
 
   .glass-fallback {
@@ -302,7 +302,8 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-stroke);
     pointer-events: none;
   }
 
@@ -335,7 +336,7 @@
   .glass-input-shell {
     border: 1px solid var(--card-border);
     background: linear-gradient(180deg, color-mix(in srgb, var(--card-bg) 90%, transparent), color-mix(in srgb, var(--glass-surface-soft) 90%, transparent));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    box-shadow: var(--glass-stroke);
   }
 
   .glass-orb {
@@ -401,7 +402,7 @@
   .playlist-card {
     border: 1px solid var(--card-border);
     background: linear-gradient(180deg, color-mix(in srgb, var(--card-bg) 96%, transparent), color-mix(in srgb, var(--glass-surface-soft) 96%, transparent));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+    box-shadow: var(--glass-stroke);
   }
 
   .playlist-controls {
