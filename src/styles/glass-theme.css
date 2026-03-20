@@ -101,11 +101,11 @@
   --glass-blur-md: 20px;
   --glass-blur-lg: 34px;
   --glass-blur-xl: 48px;
-  --glass-stroke: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+  --glass-stroke: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(0, 0, 0, 0.06);
   --card-bg: rgba(255, 255, 255, 0.56);
-  --card-border: rgba(255, 255, 255, 0.62);
+  --card-border: rgba(0, 0, 0, 0.1);
   --card-hover-bg: rgba(255, 255, 255, 0.68);
-  --card-hover-border: rgba(255, 255, 255, 0.76);
+  --card-hover-border: rgba(0, 0, 0, 0.14);
   --glow-primary: 0 0 0 1px rgba(121, 160, 255, 0.28), 0 18px 48px rgba(121, 160, 255, 0.24);
   --focus-glow: 0 0 0 4px rgba(112, 148, 255, 0.22);
   --dropdown-item-hover: rgba(72, 102, 180, 0.1);
@@ -157,6 +157,7 @@
   --glass-highlight: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 24px 64px rgba(4, 8, 18, 0.42);
   --glass-shadow-strong: 0 40px 120px rgba(2, 6, 23, 0.56);
+  --glass-stroke: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 -1px 0 rgba(255, 255, 255, 0.25);
   --card-bg: rgba(24, 30, 49, 0.58);
   --card-border: rgba(255, 255, 255, 0.16);
   --card-hover-bg: rgba(31, 39, 63, 0.74);
