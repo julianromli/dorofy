@@ -1,16 +1,21 @@
+import type { ComponentProps, ReactNode } from 'react'
 import { render, screen, fireEvent } from '@/test/test-utils'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import Timer from '@/components/Timer'
 import { TimerMode } from '@/hooks/useTimer'
 
+type MockMotionProps = ComponentProps<'div'> & {
+  children?: ReactNode
+}
+
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-    p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
+    div: ({ children, ...props }: MockMotionProps) => <div {...props}>{children}</div>,
+    h2: ({ children, ...props }: MockMotionProps) => <h2 {...props}>{children}</h2>,
+    p: ({ children, ...props }: MockMotionProps) => <p {...props}>{children}</p>,
   },
-  AnimatePresence: ({ children }: any) => children,
+  AnimatePresence: ({ children }: { children?: ReactNode }) => children,
 }))
 
 // Mock the mobile hook
@@ -30,17 +35,6 @@ describe('Timer Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    // Mock fullscreen API
-    Object.defineProperty(document, 'fullscreenElement', {
-      value: null,
-      writable: true,
-    })
-    Object.defineProperty(document.documentElement, 'requestFullscreen', {
-      value: vi.fn().mockResolvedValue(undefined),
-    })
-    Object.defineProperty(document, 'exitFullscreen', {
-      value: vi.fn().mockResolvedValue(undefined),
-    })
   })
 
   it('should render timer with correct time display', () => {
@@ -96,7 +90,7 @@ describe('Timer Component', () => {
   it('should have fullscreen toggle button', () => {
     render(<Timer {...defaultProps} />)
     
-    const fullscreenButton = screen.getByLabelText('Enter fullscreen')
+    const fullscreenButton = screen.getByLabelText('Enter fullscreen mode')
     expect(fullscreenButton).toBeInTheDocument()
   })
 

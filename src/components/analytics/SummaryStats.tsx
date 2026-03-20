@@ -1,52 +1,63 @@
 import React from 'react';
+import { Flame, ListChecks, TimerReset, Zap } from 'lucide-react';
+import { format, startOfDay, subDays } from 'date-fns';
+
+import { GlassBadge, GlassCard } from '@/components/glass';
 import { PomodoroSession } from '@/hooks/usePomodoroHistory';
 import { Task } from '@/hooks/useTasks';
-import { startOfDay, subDays, format } from 'date-fns';
 
 interface SummaryStatsProps {
   sessions: PomodoroSession[];
   tasks: Task[];
-  rangeDays: number; // 7 or 30
+  rangeDays: number;
 }
 
 const SummaryStats: React.FC<SummaryStatsProps> = ({ sessions, tasks, rangeDays }) => {
   const now = new Date();
   const since = subDays(now, rangeDays);
-
-  const sessionsInRange = sessions.filter(s => s.completedAt >= since.getTime());
-  const focusMinutes = Math.round(sessionsInRange.reduce((acc, s) => acc + s.duration, 0) / 60);
+  const sessionsInRange = sessions.filter((session) => session.completedAt >= since.getTime());
+  const focusMinutes = Math.round(sessionsInRange.reduce((total, session) => total + session.duration, 0) / 60);
   const sessionsCount = sessionsInRange.length;
-  const tasksCompleted = tasks.filter(t => t.completed && t.completedAt && t.completedAt >= since.getTime()).length;
+  const tasksCompleted = tasks.filter((task) => task.completed && task.completedAt && task.completedAt >= since.getTime()).length;
 
-  // Compute current streak (consecutive days with >=1 session, starting today)
-  const dayKeys = new Set(
-    sessions.map(s => format(startOfDay(new Date(s.completedAt)), 'yyyy-MM-dd'))
-  );
+  const dayKeys = new Set(sessions.map((session) => format(startOfDay(new Date(session.completedAt)), 'yyyy-MM-dd')));
   let streak = 0;
-  for (let i = 0; i < 365; i++) {
-    const d = format(startOfDay(subDays(now, i)), 'yyyy-MM-dd');
-    if (dayKeys.has(d)) streak += 1; else break;
+  for (let index = 0; index < 365; index += 1) {
+    const key = format(startOfDay(subDays(now, index)), 'yyyy-MM-dd');
+    if (!dayKeys.has(key)) break;
+    streak += 1;
   }
 
-  const StatCard = ({ label, value, sub }: { label: string; value: string; sub?: string }) => (
-    <div className="rounded-lg border bg-card p-4 md:p-5">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <div className="mt-1 flex items-baseline gap-2">
-        <span className="text-2xl font-semibold text-white">{value}</span>
-        {sub && <span className="text-xs text-muted-foreground">{sub}</span>}
-      </div>
-    </div>
-  );
+  const cards = [
+    { label: `Focus time · ${rangeDays}d`, value: `${focusMinutes}m`, icon: TimerReset, accent: 'default' as const },
+    { label: `Sessions · ${rangeDays}d`, value: `${sessionsCount}`, icon: Zap, accent: 'outline' as const },
+    { label: `Tasks done · ${rangeDays}d`, value: `${tasksCompleted}`, icon: ListChecks, accent: 'success' as const },
+    { label: 'Current streak', value: `${streak}d`, icon: Flame, accent: 'warning' as const },
+  ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-      <StatCard label={`Focus time (last ${rangeDays}d)`} value={`${focusMinutes}m`} />
-      <StatCard label={`Sessions (last ${rangeDays}d)`} value={`${sessionsCount}`} />
-      <StatCard label={`Tasks done (last ${rangeDays}d)`} value={`${tasksCompleted}`} />
-      <StatCard label="Current streak" value={`${streak}d`} sub="days with at least one session" />
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card, index) => {
+        const Icon = card.icon;
+        return (
+          <GlassCard key={card.label} variant={index === 0 ? 'elevated' : 'default'} className="min-h-32">
+            <div className="flex h-full flex-col justify-between gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                  <p className="mt-3 text-4xl font-bold tracking-tight text-foreground">{card.value}</p>
+                </div>
+                <div className="glass-floating-button flex h-11 w-11 items-center justify-center rounded-[1.15rem]">
+                  <Icon className="h-5 w-5 text-foreground" />
+                </div>
+              </div>
+              <GlassBadge variant={card.accent}>{card.label}</GlassBadge>
+            </div>
+          </GlassCard>
+        );
+      })}
     </div>
   );
 };
 
 export default SummaryStats;
-

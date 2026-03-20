@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { CheckCircle, Circle, Trash2, MoreVertical, Edit, CheckCheck, GripVertical } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import React, { useMemo, useState } from 'react';
+import { CheckCheck, CheckCircle2, Circle, GripVertical, MoreVertical, Trash2 } from 'lucide-react';
+import { DragDropContext, Draggable, Droppable, DropResult } from '@hello-pangea/dnd';
+
+import { GlassBadge, GlassButton, GlassCard } from '@/components/glass';
 import { Task } from '@/hooks/useTasks';
+import { cn } from '@/lib/utils';
 
 interface TaskListProps {
   tasks: Task[];
@@ -20,135 +23,108 @@ const TaskList: React.FC<TaskListProps> = ({
   onSetActive,
   onDelete,
   onClearCompleted,
-  onReorderTasks
+  onReorderTasks,
 }) => {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  
-  const handleMenuToggle = (id: string) => {
-    setOpenMenuId(openMenuId === id ? null : id);
-  };
-  
+  const completedTasks = useMemo(() => tasks.filter((task) => task.completed), [tasks]);
+  const activeTasks = useMemo(() => tasks.filter((task) => !task.completed), [tasks]);
+
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    
-    const { source, destination } = result;
-    
-    // Only handle reordering within active tasks
-    if (source.droppableId === 'active-tasks' && destination.droppableId === 'active-tasks') {
-      const reorderedActiveTasks = Array.from(activeTasks);
-      const [removed] = reorderedActiveTasks.splice(source.index, 1);
-      reorderedActiveTasks.splice(destination.index, 0, removed);
-      
-      // Combine with completed tasks and update
-      const newTasks = [...reorderedActiveTasks, ...completedTasks];
-      onReorderTasks(newTasks);
-    }
+    if (result.source.droppableId !== 'active-tasks' || result.destination.droppableId !== 'active-tasks') return;
+
+    const reordered = Array.from(activeTasks);
+    const [removed] = reordered.splice(result.source.index, 1);
+    reordered.splice(result.destination.index, 0, removed);
+    onReorderTasks([...reordered, ...completedTasks]);
   };
-  
-  const completedTasks = tasks.filter(task => task.completed);
-  const activeTasks = tasks.filter(task => !task.completed);
-  
+
   if (tasks.length === 0) {
     return (
-      <div className="mt-6 p-6 text-center border border-white/10 rounded-lg bg-black/40 backdrop-blur-md shadow-lg text-white">
-        <p className="text-white/70">No tasks yet. Add your first task to get started!</p>
-      </div>
+      <GlassCard variant="dense" className="mt-6 text-center">
+        <p className="text-sm text-muted-foreground">No tasks yet. Add the first item you want to finish this session.</p>
+      </GlassCard>
     );
   }
 
   return (
     <div className="mt-6 space-y-6 animate-fade-in">
       <DragDropContext onDragEnd={handleDragEnd}>
-        {/* Active Tasks */}
         <Droppable droppableId="active-tasks">
           {(provided) => (
-            <div 
-              className="space-y-2" 
-              {...provided.droppableProps} 
-              ref={provided.innerRef}
-            >
+            <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-3">
               {activeTasks.map((task, index) => (
                 <Draggable key={task.id} draggableId={task.id} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={`relative group p-4 rounded-lg backdrop-blur-md transition-all duration-300 ${
-                        task.id === activeTaskId
-                          ? 'bg-black/60 border border-white/20 shadow-lg'
-                          : 'bg-black/40 border border-white/10 hover:bg-black/50'
-                      } ${
-                        snapshot.isDragging ? 'shadow-2xl scale-105 rotate-2' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start flex-1">
-                          <div
-                            {...provided.dragHandleProps}
-                            className="mt-1 mr-2 text-white/40 hover:text-white/60 cursor-grab active:cursor-grabbing transition-colors"
-                          >
-                            <GripVertical className="w-4 h-4" />
-                          </div>
-                          
-                          <div 
-                            className="flex items-start cursor-pointer flex-1"
-                            onClick={() => onSetActive(task.id)}
-                          >
+                  {(draggableProvided, snapshot) => (
+                    <div ref={draggableProvided.innerRef} {...draggableProvided.draggableProps}>
+                      <GlassCard
+                        variant={task.id === activeTaskId ? 'active' : 'default'}
+                        className={cn(
+                          'transition-all duration-200',
+                          snapshot.isDragging && 'scale-[1.02] rotate-[1deg]',
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 flex-1 items-start gap-3">
                             <button
-                              className="mt-1 mr-3 text-white/60 hover:text-primary dark:hover:text-primary transition-colors"
-                              onClick={(e) => {
-                                e.stopPropagation();
+                              onClick={(event) => {
+                                event.stopPropagation();
                                 onToggleComplete(task.id);
                               }}
-                              aria-label={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                              className="mt-1 text-muted-foreground transition-colors hover:text-foreground"
+                              aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                             >
-                              {task.completed ? (
-                                <CheckCircle className="w-5 h-5" />
-                              ) : (
-                                <Circle className="w-5 h-5" />
-                              )}
+                              {task.completed ? <CheckCircle2 className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
                             </button>
-                            
-                            <div className="flex-1">
-                              <h3 className={`font-medium text-white ${
-                                task.completed ? 'text-white/50 line-through' : ''
-                              }`}>
-                                {task.title}
-                              </h3>
-                              
-                              <div className="mt-1 text-xs text-white/60">
-                                {task.completedPomodoros} / {task.estimatedPomodoros} pomodoros
+
+                            <button
+                              {...draggableProvided.dragHandleProps}
+                              className="mt-1 text-muted-foreground transition-colors hover:text-foreground"
+                              aria-label="Reorder task"
+                            >
+                              <GripVertical className="h-4 w-4" />
+                            </button>
+
+                            <button className="min-w-0 flex-1 text-left" onClick={() => onSetActive(task.id)}>
+                              <p className="truncate text-base font-semibold text-foreground">{task.title}</p>
+                              <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <GlassBadge variant={task.id === activeTaskId ? 'default' : 'outline'}>
+                                  {task.completedPomodoros}/{task.estimatedPomodoros} pomodoros
+                                </GlassBadge>
+                                {task.id === activeTaskId ? <GlassBadge variant="success">Active</GlassBadge> : null}
                               </div>
-                            </div>
+                            </button>
+                          </div>
+
+                          <div className="relative">
+                            <GlassButton
+                              onClick={() => setOpenMenuId((value) => (value === task.id ? null : task.id))}
+                              variant="ghost"
+                              size="icon"
+                              icon={MoreVertical}
+                              aria-label="Task options"
+                            />
+
+                            {openMenuId === task.id ? (
+                              <div className="glass-panel glass-panel-dense absolute right-0 z-20 mt-2 min-w-40 rounded-[1.2rem] p-2">
+                                <GlassButton
+                                  onClick={() => {
+                                    onDelete(task.id);
+                                    setOpenMenuId(null);
+                                  }}
+                                  variant="danger"
+                                  size="sm"
+                                  icon={Trash2}
+                                  className="w-full justify-start"
+                                  aria-label="Delete task"
+                                >
+                                  Delete
+                                </GlassButton>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
-                        
-                        <div className="relative">
-                          <button
-                            onClick={() => handleMenuToggle(task.id)}
-                            className="p-1 text-white/60 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-                            aria-label="Task options"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                          
-                          {openMenuId === task.id && (
-                            <div className="absolute right-0 mt-1 w-36 bg-black/80 backdrop-blur-md rounded-md shadow-md py-1 z-10 border border-white/10">
-                              <button
-                                onClick={() => {
-                                  onDelete(task.id);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full px-4 py-2 text-left text-sm flex items-center text-red-400 hover:bg-black/60"
-                                aria-label="Delete task"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      </GlassCard>
                     </div>
                   )}
                 </Draggable>
@@ -158,65 +134,53 @@ const TaskList: React.FC<TaskListProps> = ({
           )}
         </Droppable>
       </DragDropContext>
-      
-      {/* Completed Tasks */}
-      {completedTasks.length > 0 && (
-        <div className="pt-2">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-white/70">
-              Completed ({completedTasks.length})
-            </h3>
-            
-            <button
-              onClick={onClearCompleted}
-              className="text-xs text-white/60 hover:text-white flex items-center"
-              aria-label="Clear all completed tasks"
-            >
-              <CheckCheck className="w-3 h-3 mr-1" />
+
+      {completedTasks.length > 0 ? (
+        <GlassCard variant="dense" className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">Completed</p>
+              <p className="mt-1 text-sm text-muted-foreground">{completedTasks.length} tasks finished in this list.</p>
+            </div>
+            <GlassButton onClick={onClearCompleted} variant="ghost" size="sm" icon={CheckCheck} aria-label="Clear all completed tasks">
               Clear all
-            </button>
+            </GlassButton>
           </div>
-          
-          <div className="space-y-2">
-            {completedTasks.map(task => (
-              <div
-                key={task.id}
-                className="group p-4 rounded-lg bg-black/30 backdrop-blur-md border border-white/5 hover:bg-black/40 transition-all duration-300"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start">
+
+          <div className="space-y-3">
+            {completedTasks.map((task) => (
+              <GlassCard key={task.id} variant="dense" className="rounded-[1.4rem]">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
                     <button
-                      className="mt-1 mr-3 text-primary/80 hover:text-primary transition-colors"
+                      className="mt-1 text-emerald-500 transition-colors hover:text-emerald-400"
                       onClick={() => onToggleComplete(task.id)}
                       aria-label="Mark as incomplete"
                     >
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle2 className="h-5 w-5" />
                     </button>
-                    
+
                     <div>
-                      <h3 className="font-medium text-white/50 line-through">
-                        {task.title}
-                      </h3>
-                      
-                      <div className="mt-1 text-xs text-white/40">
-                        {task.completedPomodoros} / {task.estimatedPomodoros} pomodoros
+                      <p className="font-medium text-foreground/70 line-through">{task.title}</p>
+                      <div className="mt-2">
+                        <GlassBadge variant="outline">{task.completedPomodoros}/{task.estimatedPomodoros} pomodoros</GlassBadge>
                       </div>
                     </div>
                   </div>
-                  
-                  <button
+
+                  <GlassButton
                     onClick={() => onDelete(task.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 text-white/40 hover:text-red-400 rounded-full hover:bg-white/10 transition-all"
+                    variant="ghost"
+                    size="icon"
+                    icon={Trash2}
                     aria-label="Delete task"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  />
                 </div>
-              </div>
+              </GlassCard>
             ))}
           </div>
-        </div>
-      )}
+        </GlassCard>
+      ) : null}
     </div>
   );
 };

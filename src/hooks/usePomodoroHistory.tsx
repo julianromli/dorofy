@@ -17,8 +17,16 @@ const usePomodoroHistory = () => {
     const loadHistory = async () => {
       try {
         await dorofyDB.init();
-        const loadedHistory = await dorofyDB.getPomodoroHistory();
-        setHistory(loadedHistory);
+        const loadedHistory = await dorofyDB.getPomodoroHistory<PomodoroSession>();
+        setHistory((currentHistory) => {
+          if (currentHistory.length === 0) {
+            return loadedHistory;
+          }
+
+          const existingIds = new Set(currentHistory.map((session) => session.id));
+          const missingLoadedSessions = loadedHistory.filter((session) => !existingIds.has(session.id));
+          return [...currentHistory, ...missingLoadedSessions];
+        });
       } catch (error) {
         console.error('Error loading pomodoro history:', error);
       } finally {

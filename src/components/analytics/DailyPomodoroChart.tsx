@@ -44,17 +44,19 @@ const DailyPomodoroChart: React.FC<DailyPomodoroChartProps> = ({ sessions, range
         }}
       >
         <CartesianGrid strokeDasharray="3 3" strokeOpacity={0.2} />
-        <XAxis dataKey="name" />
-        <YAxis allowDecimals={false} />
+        <XAxis dataKey="name" tick={{ fill: 'rgba(148, 163, 184, 0.85)', fontSize: 12 }} axisLine={false} tickLine={false} />
+        <YAxis allowDecimals={false} tick={{ fill: 'rgba(148, 163, 184, 0.85)', fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip
           contentStyle={{
-            backgroundColor: '#1c1917',
-            borderColor: '#2c2a28',
-            color: '#d6d3d1'
+            backgroundColor: 'rgba(15, 23, 42, 0.88)',
+            borderColor: 'rgba(255, 255, 255, 0.12)',
+            color: '#e5edf8',
+            borderRadius: '18px',
+            backdropFilter: 'blur(18px)',
           }}
         />
         <Legend />
-        <Bar name={metric === 'sessions' ? 'Focus Sessions' : 'Focus Minutes'} dataKey="value" fill="#8884d8" />
+        <Bar name={metric === 'sessions' ? 'Focus Sessions' : 'Focus Minutes'} dataKey="value" fill="rgba(105, 147, 255, 0.86)" radius={[12, 12, 8, 8]} />
       </BarChart>
     </ResponsiveContainer>
   );

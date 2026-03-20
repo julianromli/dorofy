@@ -1,5 +1,8 @@
 import React from 'react';
-import { Clock, HelpCircle, BarChartHorizontal } from 'lucide-react';
+import { BarChartHorizontal, Clock3, HelpCircle, MoonStar, SunMedium } from 'lucide-react';
+import { useTheme } from 'next-themes';
+
+import { GlassButton } from '@/components/glass';
 
 interface HeaderProps {
   openHowToUse: () => void;
@@ -9,46 +12,67 @@ interface HeaderProps {
   isFullscreen?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
+const Header: React.FC<HeaderProps> = ({
   openHowToUse,
   openAnalytics,
-  toggleLongPomodoro, 
+  toggleLongPomodoro,
   isLongPomodoro,
-  isFullscreen = false 
+  isFullscreen = false,
 }) => {
+  const { resolvedTheme, setTheme } = useTheme();
+
   if (isFullscreen) return null;
 
   return (
-    <header className="w-full flex justify-between items-center px-4 py-4 animate-fade-in">
-      <div className="flex items-center space-x-2">
-        <Clock className="w-6 h-6 text-white" />
-        <h1 className="text-xl font-bold text-white">Dorofy</h1>
-      </div>
-      
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={toggleLongPomodoro}
-          className="px-3 py-1.5 text-sm rounded-full bg-white/10 hover:bg-white/20 text-white/90 transition-colors"
-          aria-label={isLongPomodoro ? "Switch to 25-minute pomodoro" : "Switch to 50-minute pomodoro"}
-        >
-          {isLongPomodoro ? '50 min' : '25 min'}
-        </button>
-        
-        <button
-          onClick={openAnalytics}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-          aria-label="View analytics"
-        >
-          <BarChartHorizontal className="w-5 h-5 text-white/80" />
-        </button>
-        
-        <button
-          onClick={openHowToUse}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-          aria-label="How to use"
-        >
-          <HelpCircle className="w-5 h-5 text-white/80" />
-        </button>
+    <header className="animate-fade-in">
+      <div className="glass-panel glass-panel-dense rounded-[1.9rem] px-4 py-4 md:px-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="glass-floating-button flex h-12 w-12 items-center justify-center rounded-[1.2rem]">
+              <Clock3 className="h-5 w-5 text-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground">Dorofy</h1>
+              <p className="text-sm text-muted-foreground">Liquid glass focus companion</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <GlassButton
+              onClick={toggleLongPomodoro}
+              variant={isLongPomodoro ? 'active' : 'default'}
+              size="sm"
+              className={isLongPomodoro ? 'glass-mode-accent text-white' : ''}
+              aria-label={isLongPomodoro ? 'Switch to 25-minute pomodoro' : 'Switch to 50-minute pomodoro'}
+            >
+              {isLongPomodoro ? '50 min focus' : '25 min focus'}
+            </GlassButton>
+
+            <GlassButton
+              onClick={openAnalytics}
+              variant="ghost"
+              size="icon"
+              icon={BarChartHorizontal}
+              aria-label="View analytics"
+            />
+
+            <GlassButton
+              onClick={openHowToUse}
+              variant="ghost"
+              size="icon"
+              icon={HelpCircle}
+              aria-label="How to use"
+            />
+
+            <GlassButton
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              variant="ghost"
+              size="icon"
+              icon={resolvedTheme === 'dark' ? SunMedium : MoonStar}
+              aria-label="Toggle theme"
+            />
+          </div>
+        </div>
       </div>
     </header>
   );

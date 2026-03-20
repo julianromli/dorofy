@@ -34,8 +34,8 @@ const useTasks = () => {
         // Load data from IndexedDB
         await dorofyDB.init();
         const [loadedTasks, loadedActiveTaskId] = await Promise.all([
-          dorofyDB.getTasks(),
-          dorofyDB.getSetting('activeTaskId')
+          dorofyDB.getTasks<Task>(),
+          dorofyDB.getSetting<string | null>('activeTaskId')
         ]);
 
         setTasks(loadedTasks);

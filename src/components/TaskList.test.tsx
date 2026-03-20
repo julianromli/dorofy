@@ -1,7 +1,10 @@
-import { render, screen, fireEvent } from '@/test/test-utils'
+import { render, screen, fireEvent, within } from '@/test/test-utils'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import TaskList from '@/components/TaskList'
 import { Task } from '@/hooks/useTasks'
+
+const hasTextContent = (text: string) => (_content: string, node: Element | null) =>
+  node?.textContent === text
 
 describe('TaskList Component', () => {
   const mockTasks: Task[] = [
@@ -39,6 +42,7 @@ describe('TaskList Component', () => {
     onSetActive: vi.fn(),
     onDelete: vi.fn(),
     onClearCompleted: vi.fn(),
+    onReorderTasks: vi.fn(),
   }
 
   beforeEach(() => {
@@ -48,7 +52,7 @@ describe('TaskList Component', () => {
   it('should render empty state when no tasks', () => {
     render(<TaskList {...defaultProps} tasks={[]} />)
     
-    expect(screen.getByText('No tasks yet. Add your first task to get started!')).toBeInTheDocument()
+    expect(screen.getByText('No tasks yet. Add the first item you want to finish this session.')).toBeInTheDocument()
   })
 
   it('should render active tasks in the main section', () => {
@@ -62,25 +66,27 @@ describe('TaskList Component', () => {
     render(<TaskList {...defaultProps} />)
     
     expect(screen.getByText('Completed Task 1')).toBeInTheDocument()
-    expect(screen.getByText('Completed (1)')).toBeInTheDocument()
+    expect(screen.getByText('Completed')).toBeInTheDocument()
   })
 
   it('should highlight active task with different styling', () => {
     render(<TaskList {...defaultProps} />)
     
-    const activeTask = screen.getByText('Active Task 1').closest('div')
-    const inactiveTask = screen.getByText('Active Task 2').closest('div')
+    const activeTask = screen.getByText('Active Task 1').closest('.glass-panel-active')
+    const inactiveTask = screen.getByText('Active Task 2').closest('.glass-panel')
     
-    expect(activeTask).toHaveClass('bg-black/60', 'border-white/20')
-    expect(inactiveTask).toHaveClass('bg-black/40', 'border-white/10')
+    expect(activeTask).toBeInTheDocument()
+    expect(activeTask).toHaveClass('glass-panel-active')
+    expect(inactiveTask).toBeInTheDocument()
+    expect(inactiveTask).not.toHaveClass('glass-panel-active')
   })
 
   it('should display pomodoro progress correctly', () => {
     render(<TaskList {...defaultProps} />)
     
-    expect(screen.getByText('1 / 3 pomodoros')).toBeInTheDocument()
-    expect(screen.getByText('0 / 2 pomodoros')).toBeInTheDocument()
-    expect(screen.getByText('4 / 4 pomodoros')).toBeInTheDocument()
+    expect(screen.getAllByText(hasTextContent('1/3 pomodoros')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(hasTextContent('0/2 pomodoros')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(hasTextContent('4/4 pomodoros')).length).toBeGreaterThan(0)
   })
 
   it('should call onSetActive when clicking on a task', () => {
@@ -191,12 +197,10 @@ describe('TaskList Component', () => {
   it('should show delete button on hover for completed tasks', () => {
     render(<TaskList {...defaultProps} />)
     
-    const completedTaskContainer = screen.getByText('Completed Task 1').closest('.group')
+    const completedTaskContainer = screen.getByText('Completed Task 1').closest('.glass-panel')
     expect(completedTaskContainer).toBeInTheDocument()
     
-    // The delete button should have opacity-0 class initially
-    const deleteButton = completedTaskContainer?.querySelector('[aria-label=\"Delete task\"]')
-    expect(deleteButton).toHaveClass('opacity-0')
+    expect(within(completedTaskContainer as HTMLElement).getByLabelText('Delete task')).toBeInTheDocument()
   })
 
   it('should handle clicking outside menu to close it', () => {
@@ -243,8 +247,8 @@ describe('TaskList Component', () => {
     
     render(<TaskList {...defaultProps} tasks={mixedTasks} />)
     
-    expect(screen.getByText('3 / 3 pomodoros')).toBeInTheDocument()
-    expect(screen.getByText('1 / 2 pomodoros')).toBeInTheDocument()
+    expect(screen.getAllByText(hasTextContent('3/3 pomodoros')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(hasTextContent('1/2 pomodoros')).length).toBeGreaterThan(0)
   })
 
   it('should maintain menu state independently for each task', () => {
@@ -264,4 +268,4 @@ describe('TaskList Component', () => {
     fireEvent.click(moreButtons[1])
     expect(screen.getByText('Delete')).toBeInTheDocument()
   })
-}
+})

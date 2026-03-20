@@ -24,6 +24,7 @@ describe('usePomodoroHistory', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(dorofyDB.getPomodoroHistory).mockResolvedValue([])
+    vi.mocked(dorofyDB.addPomodoroSession).mockResolvedValue(undefined)
   })
 
   it('should initialize with empty history', async () => {

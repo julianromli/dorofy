@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, Video, Upload, Link, X, Trash2, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/glass';
 
 interface BackgroundCustomizerProps {
   isOpen: boolean;
@@ -36,6 +36,24 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
+
+  const updateSidebarVisibility = useCallback((visible: boolean) => {
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    if (visible) {
+      sidebar.style.transform = 'translateX(0)';
+      sidebar.style.visibility = 'visible';
+      if (isFullscreen) {
+        sidebar.style.position = 'fixed';
+        sidebar.style.zIndex = '9999';
+      }
+      return;
+    }
+
+    sidebar.style.transform = 'translateX(-100%)';
+    sidebar.style.visibility = 'hidden';
+  }, [isFullscreen]);
 
   // Save backgrounds to localStorage whenever they change
   useEffect(() => {
@@ -81,32 +99,15 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('dorofyFullscreenChanged', handleDorofyFullscreenChanged as EventListener);
     };
-  }, [isOpen]);
+  }, [isOpen, updateSidebarVisibility]);
 
   useEffect(() => {
     updateSidebarVisibility(isOpen);
-  }, [isOpen]);
-
-  const updateSidebarVisibility = (visible: boolean) => {
-    const sidebar = sidebarRef.current;
-    if (!sidebar) return;
-
-    if (visible) {
-      sidebar.style.transform = "translateX(0)";
-      sidebar.style.visibility = "visible";
-      if (isFullscreen) {
-        sidebar.style.position = "fixed";
-        sidebar.style.zIndex = "9999";
-      }
-    } else {
-      sidebar.style.transform = "translateX(-100%)";
-      sidebar.style.visibility = "hidden";
-    }
-  };
+  }, [isOpen, updateSidebarVisibility]);
 
   const validateYouTubeUrl = (url: string): string | null => {
     // Extract video ID from various YouTube URL formats
-    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i;
     const match = url.match(youtubeRegex);
     
     if (match && match[1]) {
@@ -226,7 +227,7 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
 
     try {
       let finalUrl = url;
-      let type = getTypeFromUrl(url);
+      const type = getTypeFromUrl(url);
       
       // Handle YouTube URLs
       if (type === 'youtube') {
@@ -318,19 +319,19 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
       <button
         ref={toggleButtonRef}
         onClick={toggleSidebar}
-        className={`fixed bottom-4 left-4 z-[10000] p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg translate-y-[-60px] ${isFullscreen ? 'fullscreen-toggle' : ''}`}
+        className={`glass-floating-button fixed bottom-4 left-4 z-[10000] flex h-12 w-12 translate-y-[-60px] items-center justify-center rounded-full ${isFullscreen ? 'fullscreen-toggle' : ''}`}
         aria-label={isOpen ? "Close background customizer" : "Open background customizer"}
       >
-        <Image className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-white'}`} />
+        <Image className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-foreground'}`} />
       </button>
 
       <div
         ref={sidebarRef}
-        className={`background-sidebar ${isOpen ? 'background-sidebar-open' : 'background-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
+        className={`background-sidebar glass-sidebar ${isOpen ? 'background-sidebar-open' : 'background-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
       >
         <div className="p-4 border-b border-white/10">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-bold text-white flex items-center">
+            <h2 className="text-xl font-bold text-foreground flex items-center">
               <Image className="mr-2 h-5 w-5" /> Custom Background
             </h2>
             <button
@@ -338,12 +339,12 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
               className="p-1 rounded-full hover:bg-white/10"
               aria-label="Close background customizer"
             >
-              <X className="h-5 w-5 text-white/70" />
+              <X className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/70 mb-2">Add Background</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Add Background</h3>
             <input
               type="file"
               ref={fileInputRef}
@@ -352,49 +353,51 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
               className="hidden"
               id="background-file-input"
             />
-            <Button
+            <GlassButton
               onClick={() => fileInputRef.current?.click()}
-              className="w-full mb-2 bg-white/10 hover:bg-white/20 text-white"
+              variant="default"
+              className="mb-2 w-full justify-center"
             >
               <Upload className="mr-2 h-4 w-4" /> Upload File
-            </Button>
+            </GlassButton>
             
-            <h3 className="text-sm font-medium text-white/70 mb-2 mt-4">Or Paste URL</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2 mt-4">Or Paste URL</h3>
             <form onSubmit={handleUrlSubmit} className="flex gap-2">
               <input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Image, video, or YouTube URL"
-                className="flex-1 p-2 bg-white/5 border border-white/10 rounded text-white text-sm"
+                className="glass-input-shell flex-1 rounded-[1rem] border p-2 text-sm text-foreground"
               />
-              <Button
+              <GlassButton
                 type="submit"
-                className="bg-primary hover:bg-primary/90 text-white"
+                variant="hero"
+                className="justify-center"
               >
                 <Link className="h-4 w-4" />
-              </Button>
+              </GlassButton>
             </form>
           </div>
         </div>
 
         <div className="p-4">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-sm font-medium text-white/70">Your Backgrounds</h3>
+            <h3 className="text-sm font-medium text-muted-foreground">Your Backgrounds</h3>
             {activeBackgroundId && (
-              <Button 
+              <GlassButton 
                 variant="ghost" 
                 size="sm" 
                 onClick={clearBackground}
-                className="h-7 text-xs text-white/70 hover:text-white hover:bg-white/10"
+                className="h-7 text-xs"
               >
                 <Trash2 className="h-3 w-3 mr-1" /> Clear
-              </Button>
+              </GlassButton>
             )}
           </div>
 
           {backgrounds.length === 0 ? (
-            <div className="text-white/50 text-sm p-3 text-center">
+            <div className="text-muted-foreground text-sm p-3 text-center">
               No backgrounds added yet
             </div>
           ) : (
@@ -402,13 +405,13 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
               {backgrounds.map((background) => (
                 <div
                   key={background.id}
-                  className={`bg-black/50 rounded-md overflow-hidden border ${activeBackgroundId === background.id ? 'border-primary' : 'border-white/10'} cursor-pointer hover:bg-white/5 transition-colors`}
+                  className={`playlist-card rounded-[1rem] overflow-hidden border ${activeBackgroundId === background.id ? 'border-primary' : 'border-white/10'} cursor-pointer transition-colors`}
                   onClick={() => setBackground(background.id)}
                 >
                   <div className="flex justify-between items-center p-3">
                     <div className="flex items-center">
                       {getBackgroundTypeIcon(background.type)}
-                      <span className="text-white text-sm truncate max-w-[150px]">
+                      <span className="text-foreground text-sm truncate max-w-[150px]">
                         {background.type.charAt(0).toUpperCase() + background.type.slice(1)}
                       </span>
                     </div>
@@ -418,7 +421,7 @@ const BackgroundCustomizer: React.FC<BackgroundCustomizerProps> = ({ isOpen, set
                       )}
                       <button
                         onClick={(e) => removeBackground(background.id, e)}
-                        className="text-white/50 hover:text-white/80"
+                        className="text-muted-foreground hover:text-foreground"
                         aria-label="Remove background"
                       >
                         <X className="h-4 w-4" />

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { TimerMode } from '@/hooks/useTimer';
+import React, { useEffect, useRef, useState } from 'react';
+import { Maximize, Minimize, Pause, Play, RotateCcw, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Maximize, Minimize } from 'lucide-react';
+
+import { GlassBadge, GlassButton, LiquidGlassSurface } from '@/components/glass';
+import { TimerMode } from '@/hooks/useTimer';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TimerProps {
@@ -13,233 +15,202 @@ interface TimerProps {
   onReset: () => void;
 }
 
+const modeCopy: Record<TimerMode, { title: string; subtitle: string; shellClass: string; badge: string }> = {
+  pomodoro: {
+    title: 'Deep focus in progress',
+    subtitle: 'Single-task, calm, and uninterrupted.',
+    shellClass: 'glass-mode-pomodoro',
+    badge: 'Focus',
+  },
+  shortBreak: {
+    title: 'Reset in a few quiet minutes',
+    subtitle: 'Step away, breathe, and let the session settle.',
+    shellClass: 'glass-mode-shortBreak',
+    badge: 'Short Break',
+  },
+  longBreak: {
+    title: 'Longer recovery window',
+    subtitle: 'Recharge properly before the next block.',
+    shellClass: 'glass-mode-longBreak',
+    badge: 'Long Break',
+  },
+};
+
 const Timer: React.FC<TimerProps> = ({
   timeString,
   mode,
   isRunning,
   onStart,
   onPause,
-  onReset
+  onReset,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useIsMobile();
-
-  const getBgClass = () => {
-    switch (mode) {
-      case 'pomodoro':
-        return 'pomodoro-gradient';
-      case 'shortBreak':
-        return 'shortbreak-gradient';
-      case 'longBreak':
-        return 'longbreak-gradient';
-      default:
-        return 'pomodoro-gradient';
-    }
-  };
-
-  const getHeaderText = () => {
-    switch (mode) {
-      case 'pomodoro':
-        return 'Time to focus!';
-      case 'shortBreak':
-        return 'Take a quick break!';
-      case 'longBreak':
-        return 'Time for a long break!';
-      default:
-        return 'Time to focus!';
-    }
-  };
+  const heroRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        setIsFullscreen(true);
-        
-        // Ensure we give the fullscreen event enough time to propagate
-        setTimeout(() => {
-          // Dispatch a custom event that the music player can listen for
-          const event = new CustomEvent('dorofyFullscreenChanged', { 
-            detail: { isFullscreen: true } 
-          });
-          document.dispatchEvent(event);
-        }, 100);
-      }).catch(err => {
-        console.error('Error attempting to enable fullscreen mode:', err);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => {
-          setIsFullscreen(false);
-          
-          // Ensure we give the fullscreen event enough time to propagate
+      document.documentElement
+        .requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
           setTimeout(() => {
-            // Dispatch a custom event that the music player can listen for
-            const event = new CustomEvent('dorofyFullscreenChanged', { 
-              detail: { isFullscreen: false } 
+            const event = new CustomEvent('dorofyFullscreenChanged', {
+              detail: { isFullscreen: true },
             });
             document.dispatchEvent(event);
           }, 100);
-        }).catch(err => {
-          console.error('Error attempting to exit fullscreen mode:', err);
+        })
+        .catch((error) => {
+          console.error('Error attempting to enable fullscreen mode:', error);
         });
-      }
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen()
+        .then(() => {
+          setIsFullscreen(false);
+          setTimeout(() => {
+            const event = new CustomEvent('dorofyFullscreenChanged', {
+              detail: { isFullscreen: false },
+            });
+            document.dispatchEvent(event);
+          }, 100);
+        })
+        .catch((error) => {
+          console.error('Error attempting to exit fullscreen mode:', error);
+        });
     }
   };
 
-  // Listen for fullscreen change events (e.g., when user presses Escape)
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-      
-      // Dispatch event for other components that need to respond to fullscreen changes
-      const event = new CustomEvent('dorofyFullscreenChanged', { 
-        detail: { isFullscreen: !!document.fullscreenElement } 
+      const active = !!document.fullscreenElement;
+      setIsFullscreen(active);
+      const event = new CustomEvent('dorofyFullscreenChanged', {
+        detail: { isFullscreen: active },
       });
       document.dispatchEvent(event);
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  return (
-    <>
-      {isFullscreen ? (
-        <div className={`fullscreen-mode ${getBgClass()}`}>
-          <motion.div 
-            className="flex flex-col items-center justify-center p-4 md:p-8 text-center w-full max-w-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <motion.h2 
-              className="text-white/80 text-xl md:text-3xl font-medium mb-4 md:mb-6"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              key={`header-${mode}`}
-            >
-              {getHeaderText()}
-            </motion.h2>
-            
-            <motion.div 
-              className={`${isMobile ? 'text-[5rem] md:text-[8rem] lg:text-[14rem]' : 'fullscreen-timer'} font-bold text-white tracking-tight`}
+  if (isFullscreen) {
+    return (
+      <div className={`fullscreen-mode ${modeCopy[mode].shellClass}`}>
+        <motion.div
+          className="w-full max-w-5xl px-4"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+        >
+          <div className="glass-panel glass-panel-hero rounded-[2rem] px-6 py-8 md:px-10 md:py-12">
+            <div className="mb-8 flex flex-col items-center gap-4 text-center">
+              <GlassBadge className="glass-mode-accent text-white">{modeCopy[mode].badge}</GlassBadge>
+              <div>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">{modeCopy[mode].title}</h2>
+                <p className="mt-2 text-sm text-muted-foreground md:text-base">{modeCopy[mode].subtitle}</p>
+              </div>
+            </div>
+
+            <motion.div
+              className={`${isMobile ? 'text-[5rem] md:text-[8rem] lg:text-[14rem]' : 'fullscreen-timer'} text-center text-foreground`}
               key={timeString}
-              initial={{ opacity: 0.8, scale: 0.95 }}
+              initial={{ opacity: 0.8, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.2 }}
             >
               {timeString}
             </motion.div>
-            
-            <div className="flex space-x-3 md:space-x-6 mt-6">
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-10">
               {!isRunning ? (
-                <button
-                  onClick={onStart}
-                  className="p-3 md:p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
-                  aria-label="Start timer"
-                >
-                  <Play className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} fill-white`} />
-                </button>
+                <GlassButton onClick={onStart} variant="hero" size="lg" icon={Play} aria-label="Start timer">
+                  Start
+                </GlassButton>
               ) : (
-                <button
-                  onClick={onPause}
-                  className="p-3 md:p-5 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
-                  aria-label="Pause timer"
-                >
-                  <Pause className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} fill-white`} />
-                </button>
+                <GlassButton onClick={onPause} variant="hero" size="lg" icon={Pause} aria-label="Pause timer">
+                  Pause
+                </GlassButton>
               )}
-              
-              <button
-                onClick={onReset}
-                className="p-3 md:p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
-                aria-label="Reset timer"
-              >
-                <RotateCcw className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`} />
-              </button>
-              
-              <button
-                onClick={toggleFullscreen}
-                className="p-3 md:p-5 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
-                aria-label="Exit fullscreen"
-              >
-                <Minimize className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'}`} />
-              </button>
+
+              <GlassButton onClick={onReset} variant="default" size="lg" icon={RotateCcw} aria-label="Reset timer">
+                Reset
+              </GlassButton>
+
+              <GlassButton onClick={toggleFullscreen} variant="ghost" size="icon" icon={Minimize} aria-label="Exit fullscreen" />
             </div>
-            
-            <motion.p 
-              className="text-white/60 text-base md:text-xl mt-6 md:mt-12 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-            >
-              {/* Bottom Text */}
-            </motion.p>
-          </motion.div>
-        </div>
-      ) : (
-        <div className="w-full rounded-2xl shadow-lg overflow-hidden relative">
-          <div className={`w-full p-6 md:p-8 ${getBgClass()} backdrop-blur-md bg-black/40`}>
-            <motion.div 
-              className="flex flex-col items-center justify-center"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div 
-                className="text-7xl md:text-8xl font-bold text-white my-6 md:my-8 tracking-tight"
-                key={timeString}
-                initial={{ opacity: 0.8, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2 }}
-              >
-                {timeString}
-              </motion.div>
-              
-              <div className="flex space-x-4">
-                {!isRunning ? (
-                  <button
-                    onClick={onStart}
-                    className="p-4 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
-                    aria-label="Start timer"
-                  >
-                    <Play className="w-6 h-6 fill-white" />
-                  </button>
-                ) : (
-                  <button
-                    onClick={onPause}
-                    className="p-4 bg-white/20 text-white rounded-full hover:bg-white/30 transition-all duration-300 flex items-center justify-center"
-                    aria-label="Pause timer"
-                  >
-                    <Pause className="w-6 h-6 fill-white" />
-                  </button>
-                )}
-                
-                <button
-                  onClick={onReset}
-                  className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all duration-300 flex items-center justify-center"
-                  aria-label="Reset timer"
-                >
-                  <RotateCcw className="w-6 h-6" />
-                </button>
-              </div>
-            </motion.div>
           </div>
-          
-          {/* Fullscreen button */}
-          <button
-            onClick={toggleFullscreen}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors"
-            aria-label="Enter fullscreen mode"
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={heroRef} className={modeCopy[mode].shellClass}>
+      <LiquidGlassSurface
+        className="w-full"
+        innerClassName="relative"
+        mouseContainer={heroRef}
+        padding="28px"
+        variant="hero"
+      >
+        <div className="glass-mode-accent absolute right-0 top-0 h-32 w-32 rounded-full opacity-20 blur-3xl" />
+
+        <div className="flex flex-col gap-8">
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-3">
+              <GlassBadge className="glass-mode-accent text-white">{modeCopy[mode].badge}</GlassBadge>
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">{modeCopy[mode].title}</h2>
+                <p className="mt-1 max-w-md text-sm text-muted-foreground">{modeCopy[mode].subtitle}</p>
+              </div>
+            </div>
+
+            <GlassButton
+              onClick={toggleFullscreen}
+              variant="ghost"
+              size="icon"
+              icon={Maximize}
+              className="shrink-0"
+              aria-label="Enter fullscreen mode"
+            />
+          </div>
+
+          <motion.div
+            className="text-center"
+            key={timeString}
+            initial={{ opacity: 0.82, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.2 }}
           >
-            <Maximize className="w-4 h-4" />
-          </button>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs uppercase tracking-[0.18em] text-muted-foreground glass-chip">
+              <Sparkles className="h-3.5 w-3.5" />
+              Session
+            </div>
+            <div className="text-[4.8rem] font-extrabold tracking-[-0.08em] text-foreground sm:text-[5.8rem] md:text-[6.7rem]">
+              {timeString}
+            </div>
+          </motion.div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {!isRunning ? (
+              <GlassButton onClick={onStart} variant="hero" size="lg" icon={Play} aria-label="Start timer">
+                Start focus
+              </GlassButton>
+            ) : (
+              <GlassButton onClick={onPause} variant="hero" size="lg" icon={Pause} aria-label="Pause timer">
+                Pause
+              </GlassButton>
+            )}
+
+            <GlassButton onClick={onReset} variant="default" size="lg" icon={RotateCcw} aria-label="Reset timer">
+              Reset
+            </GlassButton>
+          </div>
         </div>
-      )}
-    </>
+      </LiquidGlassSurface>
+    </div>
   );
 };
 

@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Music, Play, Pause, SkipForward, SkipBack, Volume2, Save, X, GripVertical } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import { GlassButton } from '@/components/glass';
 
 interface MusicPlayerProps {
   isOpen: boolean;
@@ -36,6 +35,24 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
 
+  const updateSidebarVisibility = useCallback((visible: boolean) => {
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    if (visible) {
+      sidebar.style.transform = 'translateX(0)';
+      sidebar.style.visibility = 'visible';
+      if (isFullscreen) {
+        sidebar.style.position = 'fixed';
+        sidebar.style.zIndex = '9999';
+      }
+      return;
+    }
+
+    sidebar.style.transform = 'translateX(-100%)';
+    sidebar.style.visibility = 'hidden';
+  }, [isFullscreen]);
+
   useEffect(() => {
     localStorage.setItem('musicPlaylists', JSON.stringify(playlists));
   }, [playlists]);
@@ -64,28 +81,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('dorofyFullscreenChanged', handleDorofyFullscreenChanged as EventListener);
     };
-  }, [isOpen]);
+  }, [isOpen, updateSidebarVisibility]);
 
   useEffect(() => {
     updateSidebarVisibility(isOpen);
-  }, [isOpen]);
-
-  const updateSidebarVisibility = (visible: boolean) => {
-    const sidebar = sidebarRef.current;
-    if (!sidebar) return;
-
-    if (visible) {
-      sidebar.style.transform = "translateX(0)";
-      sidebar.style.visibility = "visible";
-      if (isFullscreen) {
-        sidebar.style.position = "fixed";
-        sidebar.style.zIndex = "9999";
-      }
-    } else {
-      sidebar.style.transform = "translateX(-100%)";
-      sidebar.style.visibility = "hidden";
-    }
-  };
+  }, [isOpen, updateSidebarVisibility]);
 
   const detectSource = (url: string): 'spotify' | 'youtube' | 'soundcloud' | 'unknown' => {
     if (url.includes('spotify.com')) return 'spotify';
@@ -101,7 +101,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
           .replace('/track/', '/track/')
           .replace('/playlist/', '/playlist/');
       
-      case 'youtube':
+      case 'youtube': {
         const ytMatch = 
           url.match(/youtube\.com\/watch\?v=([^&]+)/) || 
           url.match(/youtu\.be\/([^?]+)/);
@@ -116,6 +116,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
         }
         
         return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      }
       
       case 'soundcloud':
         return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff5500&auto_play=true&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`;
@@ -259,19 +260,19 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
       <button
         ref={toggleButtonRef}
         onClick={toggleSidebar}
-        className={`fixed bottom-4 left-4 z-[10000] p-3 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white shadow-lg ${isFullscreen ? 'fullscreen-toggle' : ''}`}
+        className={`glass-floating-button fixed bottom-4 left-4 z-[10000] flex h-12 w-12 items-center justify-center rounded-full ${isFullscreen ? 'fullscreen-toggle' : ''}`}
         aria-label={isOpen ? "Minimize music player" : "Open music player"}
       >
-        <Music className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-white'}`} />
+        <Music className={`h-5 w-5 ${isOpen ? 'text-primary' : 'text-foreground'}`} />
       </button>
 
       <div 
         ref={sidebarRef}
-        className={`music-sidebar ${isOpen ? 'music-sidebar-open' : 'music-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
+        className={`music-sidebar glass-sidebar ${isOpen ? 'music-sidebar-open' : 'music-sidebar-closed'} ${isFullscreen ? 'fullscreen-sidebar' : ''}`}
       >
-        <div className="p-4 border-b border-white/10">
+        <div className="border-b border-white/10 p-4">
           <div className="flex justify-between items-center mb-3">
-            <h2 className="text-xl font-bold text-white flex items-center">
+            <h2 className="flex items-center text-xl font-bold text-foreground">
               <Music className="mr-2 h-5 w-5" /> Music Player
             </h2>
             <button
@@ -279,33 +280,34 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
               className="p-1 rounded-full hover:bg-white/10"
               aria-label="Minimize music player"
             >
-              <X className="h-5 w-5 text-white/70" />
+              <X className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
           
           <div className="mb-4">
-            <h3 className="text-sm font-medium text-white/70 mb-2">Add Playlist</h3>
+            <h3 className="mb-2 text-sm font-medium text-muted-foreground">Add Playlist</h3>
             <input
               type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="Paste Spotify, YouTube, or SoundCloud URL"
-              className="w-full p-2 mb-2 bg-white/5 border border-white/10 rounded text-white text-sm"
+              className="glass-input-shell mb-2 w-full rounded-[1rem] border p-2 text-sm text-foreground"
             />
-            <Button
+            <GlassButton
               onClick={handleSavePlaylist}
-              className="w-full bg-primary hover:bg-primary/90 text-white"
+              variant="hero"
+              className="w-full justify-center"
             >
               <Save className="mr-2 h-4 w-4" /> Save Playlist
-            </Button>
+            </GlassButton>
           </div>
         </div>
 
         <div className="p-4">
-          <h3 className="text-sm font-medium text-white/70 mb-3">Your Playlists</h3>
+          <h3 className="mb-3 text-sm font-medium text-muted-foreground">Your Playlists</h3>
           
           {playlists.length === 0 ? (
-            <div className="text-white/50 text-sm p-3 text-center">
+            <div className="p-3 text-center text-sm text-muted-foreground">
               No playlists added yet
             </div>
           ) : (
@@ -323,16 +325,16 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
                   <div className="playlist-controls">
                     <div className="flex items-center">
                       <div className="mr-2 flex items-center">
-                        <GripVertical className="h-4 w-4 text-white/30 mr-2 cursor-grab" />
+                        <GripVertical className="mr-2 h-4 w-4 cursor-grab text-muted-foreground" />
                         <span className="playlist-number">{index + 1}</span>
                       </div>
-                      <span className="text-white truncate ml-2">{playlist.title}</span>
+                      <span className="ml-2 truncate text-foreground">{playlist.title}</span>
                     </div>
                     <div className="flex items-center">
                       <span className="mr-2">{getSourceIcon(playlist.source)}</span>
                       <button
                         onClick={(e) => removePlaylist(playlist.id, e)}
-                        className="text-white/50 hover:text-white/80"
+                        className="text-muted-foreground hover:text-foreground"
                         aria-label="Remove playlist"
                       >
                         <X className="h-4 w-4" />
@@ -345,7 +347,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ isOpen, setIsOpen }) => {
           )}
           
           {currentPlaylistId && (
-            <div className="p-2 bg-black/50 border-t border-white/10 mt-4">
+            <div className="mt-4 border-t border-white/10 p-2">
               <div className="aspect-video mb-2">
                 <iframe
                   ref={iframeRef}

@@ -1,108 +1,72 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { Coffee, Focus, Orbit, Waves } from 'lucide-react';
+
+import { GlassButton, LiquidGlassSurface } from '@/components/glass';
 import { TimerMode } from '@/hooks/useTimer';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface TimerControlsProps {
   currentMode: TimerMode;
   switchMode: (mode: TimerMode) => void;
 }
 
+const modeConfig: Record<
+  TimerMode,
+  { label: string; icon: typeof Focus; shellClass: string }
+> = {
+  pomodoro: {
+    label: 'Focus',
+    icon: Focus,
+    shellClass: 'glass-mode-pomodoro',
+  },
+  shortBreak: {
+    label: 'Short Break',
+    icon: Coffee,
+    shellClass: 'glass-mode-shortBreak',
+  },
+  longBreak: {
+    label: 'Long Break',
+    icon: Waves,
+    shellClass: 'glass-mode-longBreak',
+  },
+};
+
 const TimerControls: React.FC<TimerControlsProps> = ({ currentMode, switchMode }) => {
+  const shellRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="w-full flex justify-center p-2 mb-4">
-      <div className="flex items-center space-x-1 bg-black/40 backdrop-blur-md p-1 rounded-full shadow-md border border-white/10">
-        <div className="relative">
-          <button
-            onClick={() => switchMode('pomodoro')}
-            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
-              currentMode === 'pomodoro' 
-                ? 'text-white font-semibold' 
-                : 'text-white/40 hover:text-white/80'
-            }`}
-            aria-label="Pomodoro mode"
-          >
-            Focus
-          </button>
-          <AnimatePresence initial={false}>
-            {currentMode === 'pomodoro' && (
-              <motion.div
-                className="absolute inset-0 bg-pomodoro dark:bg-pomodoro rounded-full shadow-md"
-                layoutId="activeBackground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 500, 
-                  damping: 30,
-                  duration: 0.3 
-                }}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-        
-        <div className="relative">
-          <button
-            onClick={() => switchMode('shortBreak')}
-            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
-              currentMode === 'shortBreak' 
-                ? 'text-white font-semibold' 
-                : 'text-white/40 hover:text-white/80'
-            }`}
-            aria-label="Short break mode"
-          >
-            Short Break
-          </button>
-          <AnimatePresence initial={false}>
-            {currentMode === 'shortBreak' && (
-              <motion.div
-                className="absolute inset-0 bg-shortbreak dark:bg-shortbreak rounded-full shadow-md"
-                layoutId="activeBackground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 500, 
-                  damping: 30,
-                  duration: 0.3 
-                }}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-        
-        <div className="relative">
-          <button
-            onClick={() => switchMode('longBreak')}
-            className={`px-5 py-2 z-10 relative rounded-full text-sm font-medium transition-colors duration-200 ${
-              currentMode === 'longBreak' 
-                ? 'text-white font-semibold' 
-                : 'text-white/40 hover:text-white/80'
-            }`}
-            aria-label="Long break mode"
-          >
-            Long Break
-          </button>
-          <AnimatePresence initial={false}>
-            {currentMode === 'longBreak' && (
-              <motion.div
-                className="absolute inset-0 bg-longbreak dark:bg-longbreak rounded-full shadow-md"
-                layoutId="activeBackground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 500, 
-                  damping: 30,
-                  duration: 0.3 
-                }}
-              />
-            )}
-          </AnimatePresence>
-        </div>
+    <div className="mb-4 flex justify-center">
+      <div ref={shellRef} className={modeConfig[currentMode].shellClass}>
+        <LiquidGlassSurface
+          className="mx-auto w-fit"
+          innerClassName="flex items-center gap-1.5 rounded-full"
+          mouseContainer={shellRef}
+          padding="6px"
+          variant="active"
+        >
+          {(['pomodoro', 'shortBreak', 'longBreak'] as const).map((mode) => {
+            const Icon = modeConfig[mode].icon;
+            const isActive = mode === currentMode;
+
+            return (
+              <GlassButton
+                key={mode}
+                onClick={() => switchMode(mode)}
+                variant={isActive ? 'active' : 'ghost'}
+                size="sm"
+                icon={Icon}
+                className={isActive ? 'glass-mode-accent text-white shadow-(--glow-primary)' : 'text-muted-foreground'}
+                aria-label={`${modeConfig[mode].label} mode`}
+              >
+                {modeConfig[mode].label}
+              </GlassButton>
+            );
+          })}
+
+          <div className="hidden sm:flex items-center pr-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <Orbit className="mr-1.5 h-3.5 w-3.5" />
+            Mode
+          </div>
+        </LiquidGlassSurface>
       </div>
     </div>
   );

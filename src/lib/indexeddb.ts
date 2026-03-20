@@ -4,10 +4,10 @@
  */
 
 export interface DorofyData {
-  tasks: any[]
-  pomodoroHistory: any[]
-  timerState: any
-  settings: any
+  tasks: StoredTask[]
+  pomodoroHistory: StoredPomodoroSession[]
+  timerState: StoredTimerState | null
+  settings: DorofySettings
   activeTaskId: string | null
 }
 
@@ -16,6 +16,19 @@ export interface BackupData extends DorofyData {
   timestamp: number
   appVersion: string
 }
+
+export interface StoredTask {
+  id: string
+  [key: string]: unknown
+}
+
+export interface StoredPomodoroSession {
+  id: string
+  [key: string]: unknown
+}
+
+export type StoredTimerState = Record<string, unknown>
+export type DorofySettings = Record<string, unknown>
 
 class DorofyDB {
   private dbName = 'DorofyDB'
@@ -65,7 +78,7 @@ class DorofyDB {
     return this.db
   }
 
-  async setTasks(tasks: any[]): Promise<void> {
+  async setTasks<T extends StoredTask>(tasks: T[]): Promise<void> {
     const db = await this.ensureDB()
     const transaction = db.transaction(['tasks'], 'readwrite')
     const store = transaction.objectStore('tasks')
@@ -79,7 +92,7 @@ class DorofyDB {
     }
   }
 
-  async getTasks(): Promise<any[]> {
+  async getTasks<T extends StoredTask = StoredTask>(): Promise<T[]> {
     const db = await this.ensureDB()
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['tasks'], 'readonly')
@@ -96,7 +109,7 @@ class DorofyDB {
     })
   }
 
-  async addPomodoroSession(session: any): Promise<void> {
+  async addPomodoroSession<T extends StoredPomodoroSession>(session: T): Promise<void> {
     const db = await this.ensureDB()
     const transaction = db.transaction(['pomodoroHistory'], 'readwrite')
     const store = transaction.objectStore('pomodoroHistory')
@@ -109,7 +122,7 @@ class DorofyDB {
     await store.add(sessionWithId)
   }
 
-  async getPomodoroHistory(): Promise<any[]> {
+  async getPomodoroHistory<T extends StoredPomodoroSession = StoredPomodoroSession>(): Promise<T[]> {
     const db = await this.ensureDB()
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['pomodoroHistory'], 'readonly')
@@ -126,7 +139,7 @@ class DorofyDB {
     })
   }
 
-  async setSetting(key: string, value: any): Promise<void> {
+  async setSetting<T>(key: string, value: T): Promise<void> {
     const db = await this.ensureDB()
     const transaction = db.transaction(['settings'], 'readwrite')
     const store = transaction.objectStore('settings')
@@ -134,7 +147,7 @@ class DorofyDB {
     await store.put({ key, value })
   }
 
-  async getSetting(key: string): Promise<any> {
+  async getSetting<T = unknown>(key: string): Promise<T | undefined> {
     const db = await this.ensureDB()
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(['settings'], 'readonly')

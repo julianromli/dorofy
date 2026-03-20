@@ -1,11 +1,12 @@
-﻿import React from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-const DailyPomodoroChart = React.lazy(() => import('@/components/analytics/DailyPomodoroChart'));
+import React from 'react';
+
+import { GlassButton, GlassCard, GlassSheet } from '@/components/glass';
 import CompletedTasksLog from '@/components/analytics/CompletedTasksLog';
+const DailyPomodoroChart = React.lazy(() => import('@/components/analytics/DailyPomodoroChart'));
 import SummaryStats from '@/components/analytics/SummaryStats';
 import BackupSystem from '@/components/BackupSystem';
-import { Task } from '@/hooks/useTasks';
 import { PomodoroSession } from '@/hooks/usePomodoroHistory';
+import { Task } from '@/hooks/useTasks';
 
 interface AnalyticsSheetProps {
   isOpen: boolean;
@@ -15,76 +16,94 @@ interface AnalyticsSheetProps {
 }
 
 const AnalyticsSheet: React.FC<AnalyticsSheetProps> = ({ isOpen, onClose, tasks, pomodoroHistory }) => {
-  const completedTasks = tasks.filter(task => task.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  const completedTasks = tasks.filter((task) => task.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
   const [rangeDays, setRangeDays] = React.useState<7 | 30>(7);
   const [chartMetric, setChartMetric] = React.useState<'sessions' | 'minutes'>('sessions');
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full md:w-4/5 lg:w-3/5 xl:w-2/3 p-0">
-        <div className="h-full flex flex-col">
-          <SheetHeader className="p-6 sticky top-0 z-10 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-            <SheetTitle>Productivity Analytics</SheetTitle>
-            <SheetDescription>
-              Review your focus sessions and completed tasks to see your progress.
-            </SheetDescription>
-            <div className="mt-3 flex items-center gap-3 flex-wrap">
-              <label className="text-xs text-muted-foreground mr-2">Range</label>
-              <select
-                value={rangeDays}
-                onChange={(e) => setRangeDays(Number(e.target.value) as 7 | 30)}
-                className="bg-transparent border rounded px-2 py-1 text-sm"
-                aria-label="Analytics range"
-              >
-                <option value={7}>Last 7 days</option>
-                <option value={30}>Last 30 days</option>
-              </select>
+    <GlassSheet.Root open={isOpen} onOpenChange={onClose}>
+      <GlassSheet.Content className="left-auto right-4 w-[min(72rem,calc(100vw-2rem))]">
+        <GlassSheet.Header>
+          <GlassSheet.Title>Productivity Analytics</GlassSheet.Title>
+          <GlassSheet.Description>
+            Review your focus rhythm, completed tasks, and backups from a single glass workspace.
+          </GlassSheet.Description>
 
-              <div className="ml-2 flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Chart</span>
-                <div className="inline-flex rounded overflow-hidden border">
-                  <button
-                    className={`px-2 py-1 text-sm ${chartMetric === 'sessions' ? 'bg-primary/20 text-white' : ''}`}
-                    onClick={() => setChartMetric('sessions')}
-                    aria-pressed={chartMetric === 'sessions'}
-                  >
-                    Sessions
-                  </button>
-                  <button
-                    className={`px-2 py-1 text-sm ${chartMetric === 'minutes' ? 'bg-primary/20 text-white' : ''}`}
-                    onClick={() => setChartMetric('minutes')}
-                    aria-pressed={chartMetric === 'minutes'}
-                  >
-                    Minutes
-                  </button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <GlassButton
+              onClick={() => setRangeDays(7)}
+              variant={rangeDays === 7 ? 'active' : 'default'}
+              size="sm"
+              className={rangeDays === 7 ? 'glass-mode-accent text-white' : ''}
+            >
+              Last 7 days
+            </GlassButton>
+            <GlassButton
+              onClick={() => setRangeDays(30)}
+              variant={rangeDays === 30 ? 'active' : 'default'}
+              size="sm"
+              className={rangeDays === 30 ? 'glass-mode-accent text-white' : ''}
+            >
+              Last 30 days
+            </GlassButton>
+
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <GlassButton
+                onClick={() => setChartMetric('sessions')}
+                variant={chartMetric === 'sessions' ? 'active' : 'ghost'}
+                size="sm"
+                className={chartMetric === 'sessions' ? 'glass-mode-accent text-white' : ''}
+              >
+                Sessions
+              </GlassButton>
+              <GlassButton
+                onClick={() => setChartMetric('minutes')}
+                variant={chartMetric === 'minutes' ? 'active' : 'ghost'}
+                size="sm"
+                className={chartMetric === 'minutes' ? 'glass-mode-accent text-white' : ''}
+              >
+                Minutes
+              </GlassButton>
+            </div>
+          </div>
+        </GlassSheet.Header>
+
+        <GlassSheet.Body className="space-y-6">
+          <SummaryStats sessions={pomodoroHistory} tasks={tasks} rangeDays={rangeDays} />
+
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.9fr)]">
+            <GlassCard variant="elevated" className="min-h-[360px]">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">Focus sessions</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Trend view of completed sessions over the selected range.</p>
+                </div>
+                <div className="min-h-[300px]">
+                  <React.Suspense fallback={<div className="h-[300px] w-full animate-pulse rounded-[1.25rem] bg-muted/30" />}>
+                    <DailyPomodoroChart sessions={pomodoroHistory} rangeDays={rangeDays} metric={chartMetric} />
+                  </React.Suspense>
                 </div>
               </div>
-            </div>
-          </SheetHeader>
-          <div className="flex-grow overflow-y-auto p-6 space-y-8">
-            <SummaryStats sessions={pomodoroHistory} tasks={tasks} rangeDays={rangeDays} />
+            </GlassCard>
 
-            <div className="p-6 bg-card rounded-lg border min-h-[300px] md:h-[380px] flex flex-col">
-              <h2 className="text-xl font-semibold mb-4">Focus Sessions</h2>
-              <div className="flex-grow">
-                <React.Suspense fallback={<div className="h-[300px] w-full animate-pulse rounded bg-muted/30" />}>
-                  <DailyPomodoroChart sessions={pomodoroHistory} rangeDays={rangeDays} metric={chartMetric} />
-                </React.Suspense>
+            <GlassCard variant="default" className="min-h-[360px]">
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">Completed tasks log</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Everything you finished, filtered by completion date.</p>
+                </div>
+                <div className="min-h-[300px]">
+                  <CompletedTasksLog tasks={completedTasks} forcedRangeDays={rangeDays} />
+                </div>
               </div>
-            </div>
-            <div className="p-6 bg-card rounded-lg border min-h-[300px] md:h-[380px] flex flex-col">
-              <h2 className="text-xl font-semibold mb-4">Completed Tasks Log</h2>
-              <div className="flex-grow">
-                <CompletedTasksLog tasks={completedTasks} forcedRangeDays={rangeDays} />
-              </div>
-            </div>
-            <BackupSystem onDataImported={() => window.location.reload()} />
+            </GlassCard>
           </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+
+          <BackupSystem onDataImported={() => window.location.reload()} />
+        </GlassSheet.Body>
+      </GlassSheet.Content>
+    </GlassSheet.Root>
   );
 };
 
 export default AnalyticsSheet;
-
