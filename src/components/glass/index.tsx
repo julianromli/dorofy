@@ -38,17 +38,26 @@ export const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
   ({ className, variant = 'default', size = 'md', icon, children, ...props }, ref) => (
     <VendorButtonGlass
       ref={ref}
-      variant={buttonVariantMap[variant]}
+      variant="ghost"
       size={size}
       icon={icon}
       className={cn(
-        'min-h-11 rounded-[1.25rem] border-white/15 transition-all duration-200',
-        variant === 'hero' && 'shadow-(--glow-primary)',
-        variant === 'default' && 'shadow-(--shadow-soft)',
-        variant === 'ghost' && 'bg-transparent shadow-none',
-        variant === 'dense' && 'min-h-9 px-3 text-xs',
+        'transition-all duration-300 flex items-center justify-center font-medium',
+        variant !== 'dense' && 'min-h-11 rounded-[1.25rem]',
+        (variant === 'hero' || variant === 'active') && 'border glass-mode-accent text-white hover:opacity-90',
+        variant === 'danger' && 'border glass-panel-danger text-destructive-foreground hover:opacity-90',
+        variant === 'default' && 'border glass-fallback text-foreground hover:bg-white/10',
+        variant === 'elevated' && 'border glass-panel-elevated text-foreground hover:bg-white/10',
+        variant === 'ghost' && 'bg-transparent border-transparent shadow-none hover:bg-white/10',
+        variant === 'dense' && 'min-h-9 px-3 rounded-full text-xs border glass-fallback text-foreground hover:bg-white/10',
         className,
       )}
+      style={{
+        boxShadow: variant === 'ghost' ? undefined :
+          variant === 'hero' || variant === 'active' || variant === 'danger' ? 'var(--glow-primary), var(--glass-stroke)' :
+          variant === 'elevated' ? 'var(--glass-shadow-strong), var(--glass-stroke)' :
+          'var(--glass-shadow), var(--glass-stroke)'
+      }}
       {...props}
     >
       {children}

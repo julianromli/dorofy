@@ -123,22 +123,38 @@ const Timer: React.FC<TimerProps> = ({
               {timeString}
             </motion.div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:mt-10">
-              {!isRunning ? (
-                <GlassButton onClick={onStart} variant="hero" size="lg" icon={Play} aria-label="Start timer">
-                  Start
-                </GlassButton>
-              ) : (
-                <GlassButton onClick={onPause} variant="hero" size="lg" icon={Pause} aria-label="Pause timer">
-                  Pause
-                </GlassButton>
-              )}
+            <div className="mt-8 flex justify-center md:mt-10">
+              <LiquidGlassSurface
+                className="mx-auto w-fit"
+                innerClassName="flex items-center gap-1.5 rounded-full"
+                padding="6px"
+                variant="active"
+              >
+                <div className="relative z-0">
+                  <motion.div
+                    className="absolute inset-0 z-[-1] rounded-[1.25rem] border glass-mode-accent"
+                    style={{ boxShadow: 'var(--glow-primary), var(--glass-stroke)' }}
+                    initial={false}
+                  />
+                  {!isRunning ? (
+                    <GlassButton onClick={onStart} variant="ghost" size="md" icon={Play} className="relative z-10 text-white" aria-label="Start timer">
+                      Start focus
+                    </GlassButton>
+                  ) : (
+                    <GlassButton onClick={onPause} variant="ghost" size="md" icon={Pause} className="relative z-10 text-white" aria-label="Pause timer">
+                      Pause
+                    </GlassButton>
+                  )}
+                </div>
 
-              <GlassButton onClick={onReset} variant="default" size="lg" icon={RotateCcw} aria-label="Reset timer">
-                Reset
-              </GlassButton>
+                <GlassButton onClick={onReset} variant="ghost" size="md" icon={RotateCcw} className="text-muted-foreground hover:text-foreground" aria-label="Reset timer">
+                  Reset
+                </GlassButton>
 
-              <GlassButton onClick={toggleFullscreen} variant="ghost" size="icon" icon={Minimize} aria-label="Exit fullscreen" />
+                <div className="mx-2 h-4 w-px bg-white/10" />
+
+                <GlassButton onClick={toggleFullscreen} variant="ghost" size="icon" icon={Minimize} className="text-muted-foreground hover:text-foreground" aria-label="Exit fullscreen" />
+              </LiquidGlassSurface>
             </div>
           </div>
         </motion.div>
@@ -193,20 +209,35 @@ const Timer: React.FC<TimerProps> = ({
             </div>
           </motion.div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {!isRunning ? (
-              <GlassButton onClick={onStart} variant="hero" size="lg" icon={Play} aria-label="Start timer">
-                Start focus
-              </GlassButton>
-            ) : (
-              <GlassButton onClick={onPause} variant="hero" size="lg" icon={Pause} aria-label="Pause timer">
-                Pause
-              </GlassButton>
-            )}
+          <div className="flex justify-center">
+            <LiquidGlassSurface
+              className="mx-auto w-fit"
+              innerClassName="flex items-center gap-1.5 rounded-full"
+              mouseContainer={heroRef}
+              padding="6px"
+              variant="active"
+            >
+              <div className="relative z-0">
+                <motion.div
+                  className="absolute inset-0 z-[-1] rounded-[1.25rem] border glass-mode-accent"
+                  style={{ boxShadow: 'var(--glow-primary), var(--glass-stroke)' }}
+                  initial={false}
+                />
+                {!isRunning ? (
+                  <GlassButton onClick={onStart} variant="ghost" size="md" icon={Play} className="relative z-10 text-white" aria-label="Start timer">
+                    Start focus
+                  </GlassButton>
+                ) : (
+                  <GlassButton onClick={onPause} variant="ghost" size="md" icon={Pause} className="relative z-10 text-white" aria-label="Pause timer">
+                    Pause
+                  </GlassButton>
+                )}
+              </div>
 
-            <GlassButton onClick={onReset} variant="default" size="lg" icon={RotateCcw} aria-label="Reset timer">
-              Reset
-            </GlassButton>
+              <GlassButton onClick={onReset} variant="ghost" size="md" icon={RotateCcw} className="text-muted-foreground hover:text-foreground" aria-label="Reset timer">
+                Reset
+              </GlassButton>
+            </LiquidGlassSurface>
           </div>
         </div>
       </LiquidGlassSurface>

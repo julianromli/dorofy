@@ -75,7 +75,7 @@ Dorofy offers pre-made CSS layers/classes and React component wrappers to mainta
 
 - `<LiquidGlassSurface />`: A wrapper specifically engineered for the Hero/Timer module. Automatically injects a WebGL Liquid Glass `<canvas>` if the browser supports it, falling back to standard CSS blur natively.
 - `<GlassCard />`: Your go-to component for generic layout boxes. Maps directly to `.glass-panel` and accepts `variant` props (`default`, `elevated`, `dense`).
-- `<GlassButton />`: An interactive button with built-in hover/active states that respect the glass layout.
+- `<GlassButton />`: A universal, standalone interactable button. **Architectural Note:** All variants (excluding `ghost`) internally map to `<VendorButtonGlass variant="ghost">` but are injected with Custom Pill Aesthetics (e.g. `glass-mode-accent` or `glass-fallback`) combined with `--glass-stroke` and drop-shadows. This enforces the sleek Apple VisionOS capsule style on *every* button universally across the project, eliminating flat opaque backgrounds.
 - `<GlassBadge />`: Replaces typical solid badges with `.glass-chip` aesthetics.
 
 ---
