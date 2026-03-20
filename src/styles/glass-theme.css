@@ -501,6 +501,38 @@
     background: none !important;
   }
 
+  /* 
+   * Custom Background Optimizations
+   * When a custom image/video is active, we heavily increase the "frosting" 
+   * (blur radius & opacity) of all glass panels to ensure text remains 
+   * perfectly readable against highly detailed or noisy backgrounds.
+   */
+  .has-custom-background {
+    --glass-blur-sm: 24px;
+    --glass-blur-md: 48px;
+    --glass-blur-lg: 76px;
+  }
+
+  /* Dark mode overrides over custom backgrounds */
+  .dark.has-custom-background {
+    --card-bg: rgba(14, 20, 36, 0.76);
+    --card-hover-bg: rgba(22, 28, 48, 0.86);
+    --glass-surface: rgba(12, 16, 28, 0.68);
+    --glass-surface-soft: rgba(8, 12, 22, 0.62);
+    --card-border: rgba(255, 255, 255, 0.22);
+    --glass-highlight: rgba(255, 255, 255, 0.18);
+    --text-muted: rgba(230, 235, 255, 0.72);
+  }
+
+  /* Light mode overrides over custom backgrounds */
+  :root.has-custom-background:not(.dark) {
+    --card-bg: rgba(255, 255, 255, 0.82);
+    --card-hover-bg: rgba(255, 255, 255, 0.92);
+    --glass-surface: rgba(245, 245, 250, 0.72);
+    --glass-surface-soft: rgba(240, 240, 245, 0.68);
+    --card-border: rgba(0, 0, 0, 0.16);
+  }
+
   .has-custom-background .default-background {
     opacity: 0;
   }

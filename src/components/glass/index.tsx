@@ -130,7 +130,13 @@ export function LiquidGlassSurface({
           saturation={136}
           className="liquid-glass-backdrop-frame"
         >
-          <div className="h-full w-full rounded-[inherit]" />
+          <div 
+            className="h-full w-full rounded-[inherit]" 
+            style={{
+              background: 'linear-gradient(180deg, var(--card-bg), var(--glass-surface-soft))',
+              opacity: variant === 'hero' ? 0.85 : 0.6
+            }}
+          />
         </LiquidGlass>
       </div>
       <div className={cn('liquid-glass-content', innerClassName)} style={{ padding }}>
@@ -219,7 +225,13 @@ export function GlassDialog({ open, onOpenChange, title, description, children, 
   return (
     <ModalGlass.Root open={open} onOpenChange={onOpenChange} size={size}>
       <ModalGlass.Overlay className="bg-black/44 backdrop-blur-md" />
-      <ModalGlass.Content className="glass-panel glass-panel-elevated rounded-[2rem] border-white/20">
+      <ModalGlass.Content
+        className="glass-panel glass-panel-elevated rounded-[2rem]"
+        style={{
+          border: '1px solid var(--card-border)',
+          boxShadow: 'var(--glass-shadow-strong), var(--glass-stroke)',
+        }}
+      >
         <ModalGlass.Header className="border-b border-white/10 pb-4">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
