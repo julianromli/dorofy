@@ -1,5 +1,6 @@
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 import AddTask from '@/components/AddTask';
 import BackgroundCustomizer from '@/components/BackgroundCustomizer';
@@ -16,8 +17,6 @@ import { ListTodo } from 'lucide-react';
 import usePomodoroHistory from '@/hooks/usePomodoroHistory';
 import useTasks from '@/hooks/useTasks';
 import useTimer from '@/hooks/useTimer';
-
-const AnalyticsSheetLazy = React.lazy(() => import('@/components/AnalyticsSheet'));
 
 const containerVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -37,7 +36,7 @@ const itemVariants = {
 };
 
 const Index = () => {
-  const [analyticsSheetOpen, setAnalyticsSheetOpen] = useState(false);
+  const navigate = useNavigate();
   const [isLongPomodoro, setIsLongPomodoro] = useState(() => {
     try {
       return localStorage.getItem('isLongPomodoro') === 'true';
@@ -63,15 +62,16 @@ const Index = () => {
     reorderTasks,
   } = useTasks();
 
-  const { history: pomodoroHistory, addPomodoroSession } = usePomodoroHistory();
+  const { addPomodoroSession } = usePomodoroHistory();
 
   function handlePomodoroComplete(duration: number) {
     if (activeTaskId) incrementTaskPomodoros(activeTaskId);
-    addPomodoroSession({ duration, taskId: activeTaskId || undefined });
+    addPomodoroSession(activeTaskId ? { duration, taskId: activeTaskId } : { duration });
   }
 
   const {
     timerState,
+    timerDurations,
     switchMode,
     startTimer,
     pauseTimer,
@@ -121,6 +121,29 @@ const Index = () => {
   const activeTask = useMemo(() => tasks.find((task) => task.id === activeTaskId) ?? null, [activeTaskId, tasks]);
   const completedTasks = useMemo(() => tasks.filter((task) => task.completed).length, [tasks]);
 
+  const handleAnalyticsNavigation = () => {
+    if (timerState.isRunning) {
+      const confirmed = window.confirm(
+        'Leaving the timer page will stop and reset your current session. Do you want to continue to analytics?',
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      localStorage.setItem(
+        'timerState',
+        JSON.stringify({
+          ...timerState,
+          isRunning: false,
+          timeLeft: timerDurations[timerState.mode],
+        }),
+      );
+    }
+
+    navigate('/analytics');
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       <div className="default-background" />
@@ -134,9 +157,9 @@ const Index = () => {
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-4 md:px-6 md:py-6">
           <Header
             openHowToUse={() => setHowToUseOpen(true)}
-            openAnalytics={() => setAnalyticsSheetOpen(true)}
             toggleLongPomodoro={() => setIsLongPomodoro((value) => !value)}
             isLongPomodoro={isLongPomodoro}
+            onAnalyticsClick={handleAnalyticsNavigation}
             isFullscreen={isFullscreen}
           />
 
@@ -251,17 +274,6 @@ const Index = () => {
       >
         <ListTodo className={`h-5 w-5 ${taskBoardOpen ? 'text-primary' : 'text-foreground'}`} />
       </button>
-
-      <Suspense>
-        {analyticsSheetOpen ? (
-          <AnalyticsSheetLazy
-            isOpen={analyticsSheetOpen}
-            onClose={() => setAnalyticsSheetOpen(false)}
-            tasks={tasks}
-            pomodoroHistory={pomodoroHistory}
-          />
-        ) : null}
-      </Suspense>
       <DonationButton />
     </div>
   );

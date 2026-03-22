@@ -1,25 +1,36 @@
 import React from 'react';
 import { BarChartHorizontal, Clock3, HelpCircle, MoonStar, SunMedium } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useNavigate } from 'react-router-dom';
 
 import { GlassButton } from '@/components/glass';
 
 interface HeaderProps {
   openHowToUse: () => void;
-  openAnalytics: () => void;
   toggleLongPomodoro: () => void;
   isLongPomodoro: boolean;
+  onAnalyticsClick?: () => void;
   isFullscreen?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
   openHowToUse,
-  openAnalytics,
   toggleLongPomodoro,
   isLongPomodoro,
+  onAnalyticsClick,
   isFullscreen = false,
 }) => {
   const { resolvedTheme, setTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const handleAnalyticsClick = () => {
+    if (onAnalyticsClick) {
+      onAnalyticsClick();
+      return;
+    }
+
+    navigate('/analytics');
+  };
 
   if (isFullscreen) return null;
 
@@ -49,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({
             </GlassButton>
 
             <GlassButton
-              onClick={openAnalytics}
+              onClick={handleAnalyticsClick}
               variant="ghost"
               size="icon"
               icon={BarChartHorizontal}

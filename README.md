@@ -54,16 +54,14 @@ You need to have [Node.js](https://nodejs.org/) and [npm](https://www.npmjs.com/
     ```
     The application should now be running on `http://localhost:8080`.
 
-## Analytics Filters
+## Analytics Page
 
-Dorofy includes a Productivity Analytics sheet for reviewing your focus sessions and completed tasks.
+Dorofy includes a dedicated analytics route at `/analytics` for reviewing focus sessions, completed tasks, and local backups.
 
-- In the "Completed Tasks Log" card, use the range dropdown to filter:
-  - Last 7 days
-  - Last 30 days
-  - Specific month (a month picker appears)
-- The log is scrollable and the cards have responsive heights to prevent overlapping content on smaller screens.
-- Open the Analytics sheet from the header and adjust the dropdown(s) to change the view.
+- Use the analytics button in the header to open the analytics page.
+- The shared range selector lives at the top of the page and updates the session summary, trend chart, recent sessions, and completed tasks together.
+- Choose **Specific month** to reveal the month picker.
+- Session analysis is the primary focus of the page, while backup and restore tools live at the bottom.
 
 ## 🙏 Acknowledgments
 

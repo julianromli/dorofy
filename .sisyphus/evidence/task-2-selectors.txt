@@ -1,0 +1,11 @@
+> vite_react_shadcn_ts@0.0.0 test:run
+> vitest run src/features/analytics/selectors/sessionSelectors.test.ts src/features/analytics/selectors/taskSelectors.test.ts
+
+RUN  v2.1.9 D:/Projects/Vibe Code/dorofy
+
+✓ src/features/analytics/selectors/taskSelectors.test.ts (6 tests) 6ms
+✓ src/features/analytics/selectors/sessionSelectors.test.ts (5 tests) 8ms
+
+Test Files  2 passed (2)
+Tests  11 passed (11)
+Duration  1.34s

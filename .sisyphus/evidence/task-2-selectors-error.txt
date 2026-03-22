@@ -1,0 +1,6 @@
+Edge-case coverage executed in selector unit tests:
+- Empty session/task arrays return zero-safe summary and zero-filled chart series.
+- Inclusive preset boundaries include records exactly at the start day for 7d/30d/90d filters.
+- Specific-month filtering includes tasks completed exactly at month start and month end.
+- Recent-session mapping keeps orphaned task references visible with the fallback label "Unlinked task".
+- Sessions with no taskId are labeled "No linked task" instead of failing lookup.
